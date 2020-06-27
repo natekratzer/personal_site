@@ -3,11 +3,11 @@ output: hugodown::md_document
 # Documentation: https://sourcethemes.com/academic/docs/managing-content/
 
 title: "Using Hugodown Academic"
-subtitle: ""
-summary: ""
+subtitle: "A personal website using: R, hugodown, Academic Theme, GitHub, and Netlify"
+summary: "I'm attempting to get a website/blog up using hugodown and the academic theme. As a first post, I'm writing about the process of setting up the site."
 authors: [admin]
-tags: []
-categories: []
+tags: [hugodown, internet]
+categories: [R]
 date: 2020-06-27
 lastmod: 2020-06-27
 featured: false
@@ -29,7 +29,7 @@ image:
 projects: []
 ---
 
-I'm getting attempting to get a website/blog up using hugodown and the academic theme. As a first post, I'm writing about the process of setting up the site.
+I'm attempting to get a website/blog up using hugodown and the academic theme. As a first post, I'm writing about the process of setting up the site. This post was written in pieces as I worked on my website, so until I go back and make some edits it's more of a first-hand account than a tutorial. Hopefully it's still useful. 
 
 I started at the [hugodown site](https://hugodown.r-lib.org/index.html) and installed hugodown
 
@@ -93,8 +93,10 @@ Adding google analytics was also fairly painless, I got the tracking number from
 googleAnalytics = "<trackingIDfromgoogle>"
 ```
 
+I also found that while turning off the extra pages by setting them to false was easy, those pages still showed up across the top of the site and in the dropdown menu. That menu is controlled by `config/_default/menus.toml`, and is to easy to change once you finally find it. 
 
-Things that took me a while
-- Turning off the demo page was easy, but it still showed up across the top. The top menu is controlled by `config/_default/menus.toml`
+The two big lessons I learned from this process:
+- Update everything if you want hugodown to work on the first try
+- Expect to spend some time getting to know the academic theme. It's a complicated folder structure and frustrating when you're trying to do something specific, but it's also reasonably well documented and easy to change once you find out where the right file is in all the folders.
 
 
