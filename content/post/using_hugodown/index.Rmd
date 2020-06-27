@@ -96,7 +96,8 @@ googleAnalytics = "<trackingIDfromgoogle>"
 I also found that while turning off the extra pages by setting them to false was easy, those pages still showed up across the top of the site and in the dropdown menu. That menu is controlled by `config/_default/menus.toml`, and is to easy to change once you finally find it. 
 
 The two big lessons I learned from this process:
+
 - Update everything if you want hugodown to work on the first try
 - Expect to spend some time getting to know the academic theme. It's a complicated folder structure and frustrating when you're trying to do something specific, but it's also reasonably well documented and easy to change once you find out where the right file is in all the folders.
 
-
+I really like the set up of Netlify + GitHub for updating the blog. 
