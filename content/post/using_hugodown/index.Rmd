@@ -1,0 +1,72 @@
+---
+output: hugodown::md_document
+# Documentation: https://sourcethemes.com/academic/docs/managing-content/
+
+title: "Using Hugodown Academic"
+subtitle: ""
+summary: ""
+authors: []
+tags: []
+categories: []
+date: 2020-06-27
+lastmod: 2020-06-27
+featured: false
+draft: false
+
+# Featured image
+# To use, add an image named `featured.jpg/png` to your page's folder.
+# Focal points: Smart, Center, TopLeft, Top, TopRight, Left, Right, BottomLeft, Bottom, BottomRight.
+image:
+  caption: ""
+  focal_point: ""
+  preview_only: false
+
+# Projects (optional).
+#   Associate this post with one or more of your projects.
+#   Simply enter your project's folder or file name without extension.
+#   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
+#   Otherwise, set `projects = []`.
+projects: []
+---
+
+I'm getting attempting to get a website/blog up using hugodown and the academic theme. As a first post, I'm writing about the process of setting up the site.
+
+I started at the [hugodown site](https://hugodown.r-lib.org/index.html) and installed hugodown
+
+```{r, eval = FALSE}
+devtools::install_github("r-lib/hugodown")
+```
+
+Then when I tried to create an academic site I got a helpful error message telling me how to install hugo first, so the next two steps are to first install hugo and then create the academic site. The `create_site_academic()` function errored out informing me that `Error: 'ui_silence' is not an exported object from 'namespace:usethis'` which was resolved by installing the latest version of `usethis` from CRAN.
+
+```{r, eval = FALSE}
+hugodown::hugo_install('0.66.0')
+hugodown::create_site_academic()
+```
+
+At that point I was able to preview the default site
+
+```{r, eval = FALSE}
+hugodown::hugo_start()
+```
+
+When using the `use_post` function to create a this post I discovered it seems to set the working directory into the content folder already
+
+```{r, eval = FALSE}
+#This errors with the directory not found
+hugodown::use_post("content/post/using_hugodown")
+
+#This works
+hugodown::use_post("post/using_hugodown")
+```
+
+At this point I tried knitting this post to see if the site would update and had an error of `Unknown extension: task_lists`. I tried updating `knitr` and had the same error. Next I tried installing the latest version of [pandoc](https://pandoc.org/installing.html), which worked and I was able to knit this post. Rerunning `hugo_start` showed me that the post had been added. 
+
+```{r, eval = FALSE}
+hugodown::hugo_start()
+```
+
+
+
+
+
