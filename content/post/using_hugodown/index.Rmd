@@ -5,7 +5,7 @@ output: hugodown::md_document
 title: "Using Hugodown Academic"
 subtitle: ""
 summary: ""
-authors: []
+authors: [admin]
 tags: []
 categories: []
 date: 2020-06-27
@@ -85,5 +85,16 @@ weight = 10  # Order that this section will appear.
 ```
 
 In order to update from being Nelson Bighetti you need to look in `content/authors/admin`. By default the admin folder is linked, although if you add additional authors there is an option in `content/home/about.md` to change which author is displayed. While the initial folder structure of the academic theme is pretty overwhelming I found that just approaching it a file at a time and reading the comments let me do most of what I wanted to do. 
+
+Adding google analytics was also fairly painless, I got the tracking number from the google analytics site and then put it in the config.toml file. The other code that Google talks about being required for this to work is already built into the academic theme, so you only have to add the tracking ID. 
+
+```{r}
+# Enable analytics by entering your Google Analytics tracking ID
+googleAnalytics = "<trackingIDfromgoogle>"
+```
+
+
+Things that took me a while
+- Turning off the demo page was easy, but it still showed up across the top. The top menu is controlled by `config/_default/menus.toml`
 
 
