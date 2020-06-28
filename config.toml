@@ -15,9 +15,6 @@ baseurl = "https://www.natekratzer.com/"
 # To display a copyright symbol, type `&copy;`. For current year, type `{year}`.
 copyright = "&copy; 2020"
 
-# Enable analytics by entering your Google Analytics tracking ID
-googleAnalytics = "UA-171069888-1"
-
 ############################
 ## Advanced options below ##
 ############################
@@ -26,7 +23,7 @@ googleAnalytics = "UA-171069888-1"
 theme = "academic"
 
 # Get last modified date for content from Git?
-enableGitInfo = true
+enableGitInfo = false
 
 # Default language to use (if you setup multilingual support)
 defaultContentLanguage = "en"
