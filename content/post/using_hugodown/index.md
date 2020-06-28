@@ -9,7 +9,7 @@ authors: [admin]
 tags: [hugodown, internet]
 categories: [R]
 date: 2020-06-27
-lastmod: 2020-06-27
+lastmod: 2020-06-28
 featured: false
 draft: false
 
@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 4a1a92a6a216204b
+rmd_hash: 9e3c606c198400a8
 
 ---
 
@@ -127,7 +127,7 @@ The first thing I did was work with the `content/home` folder and turn off some 
 
 ![content/home folder](./academic_home_folder.png)
 
-If you open content/home/hero you'll be see this markdown at the top. I set active to false to get rid of the banner in the example site.
+If you open `content/home/hero` you'll be see this markdown at the top. I set active to false to get rid of the banner in the example site.
 
 ![](./top_of_hero.png)
 
@@ -167,7 +167,7 @@ I found the [deploy instructions](https://hugodown.r-lib.org/articles/deploy.htm
 
 The site checks from Github are set up automatically which is extremely nice, as is the ability to preview the site before merging in a pull request.
 
-![](./github_integration)
+![](./github_integration.png)
 
 While it took some time to figure out where things are in the Hugo Academic template overall it seems like a good set up that will be easy both to maintain and to add to over time.
 
