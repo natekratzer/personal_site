@@ -1,8 +1,7 @@
-This is a [hugo](http://gohugo.io/) [academic](https://sourcethemes.com/academic) created by [hugodown](http://hugodown.r-lib.org/).
+# Personal Website
 
-## Basic operation
+This is the code for my personal [website](https://natekratzer.com)
 
-* Preview the site with `hugodown::hugo_start()`; it will automatically
-  update (navigating to the latest change) as you modify `content/`.
+It is a [hugo](http://gohugo.io/) [academic](https://sourcethemes.com/academic) site created by [hugodown](http://hugodown.r-lib.org/).
 
-* Create a new post bundle with `hugodown::use_post('post/short-title')`.
+
