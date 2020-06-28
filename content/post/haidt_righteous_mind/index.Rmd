@@ -56,7 +56,7 @@ In The Righteous Mind, Haidt argues that there are six moral foundations that ar
 
 When we appeal to people morally we can appeal to any of these six foundations that are found in the human brain. The difference between liberals and conservatives is the degree to which they are concerned with each foundation. Liberals tend to be much more sensitive to appeals to the first three foundations. Liberal morality is based around not causing or allowing harm to others, fairness as equality, and a strong sensitivity to the oppression of the weak by the strong. Conservatives care about these three foundations (although not as strongly as liberals) but they are also significantly more likely than liberals to pick up on appeals to loyalty, authority and sanctity. Below you can see my scores (green) liberal scores (blue) and conservative scores (red) on each of 5 foundations of morality (The liberty/oppression foundation is left out because it was added to foundation theory later).
 
-![Moral Foundations]("./img/nates-morals1.png")
+![Moral Foundations]("img/moral_foundations.png")
 
 # Conservative but not Republican
 
