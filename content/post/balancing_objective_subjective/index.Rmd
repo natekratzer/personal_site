@@ -1,0 +1,47 @@
+---
+output: hugodown::md_document
+# Documentation: https://sourcethemes.com/academic/docs/managing-content/
+
+title: "Balancing Objective and Subjective Approaches to Knowledge"
+subtitle: ""
+summary: ""
+authors: [admin]
+tags: [Wendell Berry, Adam Smith, Amartya Sen]
+categories: [Philosophy]
+date: 2013-02-27
+lastmod: 2013-02-27
+featured: false
+draft: false
+
+# Featured image
+# To use, add an image named `featured.jpg/png` to your page's folder.
+# Focal points: Smart, Center, TopLeft, Top, TopRight, Left, Right, BottomLeft, Bottom, BottomRight.
+image:
+  caption: ""
+  focal_point: ""
+  preview_only: false
+
+# Projects (optional).
+#   Associate this post with one or more of your projects.
+#   Simply enter your project's folder or file name without extension.
+#   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
+#   Otherwise, set `projects = []`.
+projects: []
+---
+
+There are some things that should not be considered from an objective viewpoint. Human beings can never be fully objective, but for many topics of scientific inquiry it is helpful to be as objective as humanly possible. The problem with objectivity is that it removes things from their relational context. Human beings are defined by their relationships with other humans and the world around them. Objectivity denies those subjective relationships. This has the effect of simplifying an object of inquiry. By isolating the object from the web of relationships around it, the object in and of itself can be analyzed. The problem, of course, is that having objectified the object of our study, we have lost track of the ways in which it interacts with other things and is in some ways constituted and defined by those interactions.
+
+No one has written about the need for a subjective understanding of people, places, and animals with more clarity and lucidity than Wendell Berry. Berry makes the case that the objectivity of agricultural science is actually damaging to the cause of farming precisely because objectivity removes the personal connection and affection that a farmer has for her farm:
+
+>It is readily evident, once affection is allowed into the discussion of “land use,” that the life of the mind, as presently constituted in the universities, is of no help. The sciences are of no help, indeed are destructive, because they work, by principle, outside the demands, checks, and corrections of affection. The problem of this “scientific objectivity” becomes immediately clear when science undertakes to “apply” itself to land use. The problem simply is that land users are using people, places, and things that cannot be well used without affection. To be well used, creatures and places must be used sympathetically, just as they must be known sympathetically to be well known. The economist to whom it is of no concern whether or not a family loves its farm will almost inevitably aid and abet the destruction of family farming. The “animal scientist” to whom it is of no concern whether or not the animals suffer will almost inevitably aid and abet the destruction of the decent old ideal of animal husbandry, and, as a consequence, increase the suffering of animals. I hope that my country may be delivered from the remote, cold abstractions of university science.
+
+Berry's critique is entirely necessary in an agricultural landscape that is now primarily composed of large corporations that have crushed family farming and implemented concentrated animal feeding operations (factory farming). One of the many reasons I find reading Berry so refreshing is that he is relentless in his critique of the academic world in which I live. Berry is familiar enough with the academy to be able to offer substantive critiques, but because he chose to write outside of an academic context he is able to provide the indispensably valuable viewpoint of a rural farmer. Berry does not stop before pointing out the culpability of the humanities in our current situation:
+
+>But “the humanities” as presently constituted in the universities are of no help either, and indeed, with respect to the use of a beloved country, they too have been destructive. … The humanities have been destructive not because they have been misapplied, but because they have been so frequently understood by their academic stewards to be inapplicable.. The scientific ideals of objectivity and specialization have now crept into the humanities and made themselves at home. This has happened, I think, because the humanities have come to be infected with a suspicion of their uselessness or worthlessness in the face of the provability or workability or profitability of the applied sciences.
+
+Berry is correct to point to the short-comings of an over-emphasis on objective knowledge. However, the flaws in objective knowledge do not in any way diminish the flaws of subjectivity. Amartya Sen's idea of positional objectivity is an intriguing solution to this potential dilemma. Sen, drawing on Adam Smith's idea of an impartial spectator, argues that positional objectivity is fulfilled if someone else (an impartial spectator) who was in your position would also have the knowledge that you have. If someone else who also felt genuine affection for the farm were in your shoes, would they agree with your assessment of its land use? The problem, of course, is that human beings are radically different. There is no impartial spectator or 'someone else' who can come in from the outside and let us know if your subjectivity is revealing a reality that cannot be measured by objective science; or if your subjectivity is blinding you to reality.
+
+Nonetheless, since objectivity is also impossible for somewhat similar reasons (we can't see something from no position whatsoever), it seems to me that positional objectivity is something that should be considered as a goal. For example, in this case we could ask if the link between family and farm and the affection between farmers and animals is something that is generally shared by farmers across the country or if it is just a quirk of Berry's. If it is a shared characteristic, then we have reason to believe that our fictional impartial spectator would grant the status of positionally objective knowledge to the idea that affection is a necessary part of land use determinations.
+
+I really do think that academia has swung too far in the direction of pure objectivity, but I'm not sure that subjective knowledge or positionally objective knowledge are good solutions. If anyone else has suggestions for the best ways to study practical problems like land use I'd love to hear about them in comments.
+
