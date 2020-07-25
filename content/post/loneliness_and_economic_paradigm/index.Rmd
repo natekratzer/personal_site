@@ -1,0 +1,46 @@
+---
+output: hugodown::md_document
+# Documentation: https://sourcethemes.com/academic/docs/managing-content/
+
+title: "loneliness_and_economic_paradigm"
+subtitle: ""
+summary: ""
+authors: [admin]
+tags: [loneliness, Berry]
+categories: [Economics, Public Policy]
+date: 2013-08-24
+lastmod: 2013-08-24
+featured: false
+draft: false
+
+# Featured image
+# To use, add an image named `featured.jpg/png` to your page's folder.
+# Focal points: Smart, Center, TopLeft, Top, TopRight, Left, Right, BottomLeft, Bottom, BottomRight.
+image:
+  caption: ""
+  focal_point: ""
+  preview_only: false
+
+# Projects (optional).
+#   Associate this post with one or more of your projects.
+#   Simply enter your project's folder or file name without extension.
+#   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
+#   Otherwise, set `projects = []`.
+projects: []
+---
+
+Loneliness increases ones mortality risk by about as much as smoking, and twice as much as obesity. [Loneliness](https://slate.com/technology/2013/08/dangers-of-loneliness-social-isolation-is-deadlier-than-obesity.html) has also been rising the U.S., doubling from 20 percent in the 1980s up to 40 percent today.
+
+There are several possible reasons for this increase in loneliness. [Facebook use correlates with less happiness](https://www.economist.com/science-and-technology/2013/08/16/get-a-life), not more. Loneliness is not about the number of friends you have, but more about the quality. It’s about the number of people you can depend on if you need to, and who can depend on you in return. While I have little doubt that technology (probably more TV than Facebook) is part of the story of social isolation, I don’t think it is the whole story.
+
+There is also a continuing trend in which public policy makers look at individuals as consumers and producers, rather than whole beings. We measure GDP and unemployment, but I’ve never heard a congressperson talk about the rise in loneliness. Structuring society to maximize production and consumption is not enough because production and consumption are not the end goals of human life. The modern economy has required moving around in ways that displace individuals and upend community, and the economic point of view still [argues that [we aren’t moving enough](https://slate.com/business/2013/08/unemployment-is-very-low-in-some-cities-so-why-dont-people-move-there.html).
+
+Wendell Berry, rooted as he is in local Kentucky, writes:
+
+>By what standard, or from what point of view, are we permitted to suppose that the displaced people were not needed in their original places? According to the industrial standard and point of view, persons are needed only when they perform a service valuable to an employer. When a machine can perform the same service, a person then is not needed…..Our mobility, whether enforced or fashionable, has dismembered and scattered families and communities…..Might it not be that displaced persons were needed by their families and their neighbors, not only for their economic assistance to the home place and household, but for their love and understanding, for their help and comfort in times of trouble?
+
+Berry, because he recognizes an individual as more than an economic unit, sees the ways in which our economy is harming people:
+
+>…the destruction of life is a part of the daily business of economic competition as now practiced. If one person is willing to take another’s property or to accept another’s ruin as a normal result of economic enterprise, then he is willing to destroy the other person’s life as it is and as it desires to be. That this person’s biological existence has been spared seems merely incidental; it was spared because it was not worth anything. That this person is now “free” to “seek retraining and get into another line of work” signifies only that his life as it was has been destroyed.
+
+Now, I want to be clear in what I am saying. The benefits of geographical mobility and the additional production and consumption that go with it may outweigh the loss of community and increased loneliness that accompanies it. But it also might not. Right now we’re pretty much ignoring social capital in our public policy making, and that has to stop. It is not that the economic paradigm is entirely wrong, so much as it is entirely too limited.
