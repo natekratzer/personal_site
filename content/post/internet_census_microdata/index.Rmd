@@ -1,0 +1,184 @@
+---
+output: hugodown::md_document
+# Documentation: https://sourcethemes.com/academic/docs/managing-content/
+
+title: "How to Use Census Microdata to Analyze High Speed Internet in Kentucky"
+subtitle: ""
+summary: ""
+authors: [admin]
+tags: []
+categories: []
+date: 2020-08-29
+lastmod: 2020-08-29
+featured: false
+draft: true
+
+# Featured image
+# To use, add an image named `featured.jpg/png` to your page's folder.
+# Focal points: Smart, Center, TopLeft, Top, TopRight, Left, Right, BottomLeft, Bottom, BottomRight.
+image:
+  caption: ""
+  focal_point: ""
+  preview_only: false
+
+# Projects (optional).
+#   Associate this post with one or more of your projects.
+#   Simply enter your project's folder or file name without extension.
+#   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
+#   Otherwise, set `projects = []`.
+projects: []
+---
+
+# Getting the Data
+
+The easiest way to get census microdata is through the Integrated Public Use Microdata Series (IPUMS) hosted by the University of Minnesota. While you can get the data directly from the Census Bureau, IPUMS has made it much easier to compare across multiple years and to select the variables you want. IPUMS also provides a codebook that is easy to refer to and notes any important changes from year to year. 
+
+I've put the data for just Kentucky up on GitHub, so I'll read it in from there and then we can take a quick look at it. I like `skimr::skim()` for taking a look at the data. When downloading the data it's all numeric, even for variables that are categorial - they've been coded and our first step in the analysis will be using the code book to translate them. 
+
+```{r, message = FALSE}
+library(tidyverse)
+
+df <- read_csv("https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv")
+
+skimr::skim(df)
+```
+
+# Cleaning the Data
+
+I won't show all the codebooks, but for this first variable let's take a look at what IPUMS has to say. For all years N/A is coded as 00 and No high speed internet is coded as 20. Prior to 2016 there are detailed codes for the type of internet access, while for 2016 and after the code is collapsed. 
+
+![](high_speed_code.png)
+
+```{r}
+# High Speed Internet
+df <- df %>%
+  mutate(
+    hspd_int = case_when(
+      CIHISPEED == 00 ~ NA_character_,
+      CIHISPEED == 20 ~ "No",
+      CIHISPEED >= 10 & CIHISPEED < 20 ~ "Yes",
+      TRUE ~ NA_character_
+    )
+  )
+```
+
+## Getting wrong answers by not knowing the data
+
+Now that we have a high speed internet category we can group the data and count up how many responses are in each group. I'll also pivot the dataframe to make it easy to calculate percent with high speed internet. 
+
+```{r}
+# Count numbers with and without high speed internet
+df_group <- df %>%
+  group_by(hspd_int, YEAR) %>%
+  summarize(count = n())
+
+# Pivot for easier percent calculations
+df_wide <- df_group  %>%
+  pivot_wider(id_cols = YEAR, names_from = hspd_int, values_from = count) %>%
+  mutate(percent_hspd = round(100 * (Yes / (Yes + No)), 1))
+
+knitr::kable(df_wide)
+```
+
+While it looks like we have our answers there are two things that are wrong. First, the Census data is weighted. Instead of a count of responses we want to weight them using the person weights the census provides. We can fix that with a pretty simple change - use `sum(PERWT)` instead of `n()` in getting the count of people with and without high speed internet. 
+
+```{r}
+# Count numbers with and without high speed internet
+df_group <- df %>%
+  group_by(hspd_int, YEAR) %>%
+  summarize(count = sum(PERWT))
+
+# Pivot for easier percent calculations
+df_wide <- df_group  %>%
+  pivot_wider(id_cols = YEAR, names_from = hspd_int, values_from = count) %>%
+  mutate(percent_hspd = round(100 * (Yes / (Yes + No)), 1))
+
+knitr::kable(df_wide)
+```
+
+This is better. The second problem is harder to spot. There are 3 hints in the data:
+
+1. There are more NA values than there are people who said they don't have access
+2. Percent of of people with high speed access is going down over time, while the number of NA answers is going up.
+3. These numbers look very high for Kentucky. 
+
+A sensible guess is that people who say they don't have internet access at all aren't then asked about high speed internet and show up as an NA value when we want to code them as not having high speed interent.
+
+So let's get to know the data a bit better by adding in internet access. We'll do the same analysis, but I'll add internet as another id variable just like year. WE can see right away that the answers we have above are only including cases where individuals have internet. 
+
+```{r}
+df <- df %>%
+  mutate(
+    int = case_when(
+      CINETHH == 0 ~ NA_character_,
+      CINETHH == 1 | CINETHH == 2 ~ "Yes",
+      CINETHH == 3 ~ "No",
+      TRUE ~ NA_character_
+    )
+  )
+
+df_group <- df %>%
+  group_by(hspd_int, int, YEAR) %>%
+  summarize(count = sum(PERWT))
+
+# Pivot for easier percent calculations
+df_wide <- df_group  %>%
+  pivot_wider(id_cols = c(YEAR, int), names_from = hspd_int, values_from = count) %>%
+  mutate(percent_hspd = round(100 * (Yes / (Yes + No)), 1))
+
+knitr::kable(df_wide)
+```
+
+So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet. 
+
+```{r}
+df <- df %>%
+  mutate(
+    int = case_when(
+      CINETHH == 0 ~ NA_character_,
+      CINETHH == 1 | CINETHH == 2 ~ "Yes",
+      CINETHH == 3 ~ "No",
+      TRUE ~ NA_character_
+    ),
+    hspd_int = case_when(
+      CIHISPEED == 00 & int != "No" ~ NA_character_,
+      CIHISPEED == 20 | int == "No" ~ "No",
+      CIHISPEED >= 10 & CIHISPEED < 20 ~ "Yes",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Count numbers with and without high speed internet
+df_group <- df %>%
+  group_by(hspd_int, YEAR) %>%
+  summarize(count = sum(PERWT))
+
+# Pivot for easier percent calculations
+df_wide <- df_group  %>%
+  pivot_wider(id_cols = c(YEAR), names_from = hspd_int, values_from = count) %>%
+  mutate(percent_hspd = round(100 * (Yes / (Yes + No)), 1))
+
+knitr::kable(df_wide)
+```
+
+
+## Group Quarters in the Census
+
+
+# Analysis
+
+## Race, Poverty, and Geography
+
+# Visualizing the Data
+
+
+
+# Mapping the Data
+
+```{r}
+# Internet Overall
+
+
+skimr::skim(df %>% select(hspd_int))
+```
+
