@@ -1,32 +1,6 @@
 ---
-output: hugodown::md_document
-# Documentation: https://sourcethemes.com/academic/docs/managing-content/
-
-title: "How to Use Census Microdata to Analyze High Speed Internet in Kentucky"
-subtitle: ""
-summary: ""
-authors: [admin]
-tags: []
-categories: []
-date: 2020-08-29
-lastmod: 2020-08-29
-featured: false
-draft: true
-
-# Featured image
-# To use, add an image named `featured.jpg/png` to your page's folder.
-# Focal points: Smart, Center, TopLeft, Top, TopRight, Left, Right, BottomLeft, Bottom, BottomRight.
-image:
-  caption: ""
-  focal_point: ""
-  preview_only: false
-
-# Projects (optional).
-#   Associate this post with one or more of your projects.
-#   Simply enter your project's folder or file name without extension.
-#   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
-#   Otherwise, set `projects = []`.
-projects: []
+title: "rmarkdown"
+output: html_document
 ---
 
 # Getting the Data
@@ -80,22 +54,22 @@ df_wide <- df_group  %>%
          percent_NA = (`NA` / (Yes + No + `NA`)))
 
 # Using the GT package to format the table
-# df_wide %>%
-#   gt() %>%
-#   tab_header("Wrong High Speed Internet Results") %>%
-#   fmt_number(columns = vars(No, Yes, `NA`),
-#              decimals = 0) %>%
-#   fmt_percent(columns = vars(percent_hspd, percent_NA),
-#               decimals = 1) %>%
-#   cols_label(
-#     YEAR = "Year",
-#     percent_hspd = "Percent Yes",
-#     percent_NA = "Percent NA"
-#   ) %>%
-#   cols_move(
-#     columns = vars(percent_hspd, Yes, No, `NA`, percent_NA),
-#     after = vars(YEAR)
-#   )
+df_wide %>%
+  gt() %>%
+  tab_header("Wrong High Speed Internet Results") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             decimals = 0) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_NA),
+              decimals = 1) %>%
+  cols_label(
+    YEAR = "Year",
+    percent_hspd = "Percent Yes",
+    percent_NA = "Percent NA"
+  ) %>%
+  cols_move(
+    columns = vars(percent_hspd, Yes, No, `NA`, percent_NA),
+    after = vars(YEAR)
+  )
 ```
 
 While it looks like we have our answers there are two things that are wrong. First, the Census data is weighted. Instead of a count of responses we want to weight them using the person weights the census provides. We can fix that with a pretty simple change - use `sum(PERWT)` instead of `n()` in getting the count of people with and without high speed internet. 
@@ -257,4 +231,3 @@ That removed about half of our NA values. It might be nice to know a bit more ab
 # Internet Overall
 
 ```
-
