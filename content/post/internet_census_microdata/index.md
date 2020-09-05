@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 5be6c74f9052ab79
+rmd_hash: 09960f6d95246c8e
 
 ---
 
@@ -41,11 +41,15 @@ I've put the data for just Kentucky up on GitHub, so I'll read it in from there 
 <div class="highlight">
 
 <pre class='chroma'><code class='language-r' data-lang='r'><span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='http://tidyverse.tidyverse.org'>tidyverse</a></span>)
-<span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='https://github.com/rstudio/gt'>gt</a></span>)
+
+<span class='c'>#&gt; Warning: replacing previous import 'vctrs::data_frame' by 'tibble::data_frame' when loading 'dplyr'</span>
+
+<span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='https://renkun.me/formattable'>formattable</a></span>)
 
 <span class='k'>df</span> <span class='o'>&lt;-</span> <span class='nf'>read_csv</span>(<span class='s'>"https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv"</span>)
 
 <span class='k'>skimr</span>::<span class='nf'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span>(<span class='k'>df</span>)
+
 </code></pre>
 
 |                                                  |        |
@@ -107,7 +111,8 @@ I won't show all the codebooks, but for this first variable let's take a look at
       <span class='k'>CIHISPEED</span> <span class='o'>&gt;=</span> <span class='m'>10</span> <span class='o'>&amp;</span> <span class='k'>CIHISPEED</span> <span class='o'>&lt;</span> <span class='m'>20</span> <span class='o'>~</span> <span class='s'>"Yes"</span>,
       <span class='kc'>TRUE</span> <span class='o'>~</span> <span class='m'>NA_character_</span>
     )
-  )</code></pre>
+  )
+</code></pre>
 
 </div>
 
@@ -122,31 +127,174 @@ Now that we have a high speed internet category we can group the data and count 
 <span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
   <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>summarize</span>(count = <span class='nf'>n</span>())
+
 <span class='c'>#&gt; `summarise()` regrouping output by 'hspd_int' (override with `.groups` argument)</span>
+
 
 <span class='c'># Pivot for easier percent calculations</span>
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
   <span class='nf'>pivot_wider</span>(id_cols = <span class='k'>YEAR</span>, names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
-         percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+         percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))) 
 
-<span class='c'># Using the GT package to format the table</span>
-<span class='c'># df_wide %&gt;%</span>
-<span class='c'>#   gt() %&gt;%</span>
-<span class='c'>#   tab_header("Wrong High Speed Internet Results") %&gt;%</span>
-<span class='c'>#   fmt_number(columns = vars(No, Yes, `NA`),</span>
-<span class='c'>#              decimals = 0) %&gt;%</span>
-<span class='c'>#   fmt_percent(columns = vars(percent_hspd, percent_NA),</span>
-<span class='c'>#               decimals = 1) %&gt;%</span>
-<span class='c'>#   cols_label(</span>
-<span class='c'>#     YEAR = "Year",</span>
-<span class='c'>#     percent_hspd = "Percent Yes",</span>
-<span class='c'>#     percent_NA = "Percent NA"</span>
-<span class='c'>#   ) %&gt;%</span>
-<span class='c'>#   cols_move(</span>
-<span class='c'>#     columns = vars(percent_hspd, Yes, No, `NA`, percent_NA),</span>
-<span class='c'>#     after = vars(YEAR)</span>
-<span class='c'>#   )</span></code></pre>
+<span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>transmute</span>(
+    Year = <span class='k'>YEAR</span>,
+    `Percent Yes` = <span class='nf'><a href='https://rdrr.io/pkg/formattable/man/percent.html'>percent</a></span>(<span class='k'>percent_hspd</span>, digits = <span class='m'>1</span>),
+    `Percent NA` = <span class='nf'><a href='https://rdrr.io/pkg/formattable/man/percent.html'>percent</a></span>(<span class='k'>percent_NA</span>, digits = <span class='m'>1</span>),
+    Yes = <span class='nf'><a href='https://rdrr.io/pkg/formattable/man/comma.html'>comma</a></span>(<span class='k'>Yes</span>, digits = <span class='m'>0</span>),
+    No = <span class='nf'><a href='https://rdrr.io/pkg/formattable/man/comma.html'>comma</a></span>(<span class='k'>No</span>, digits = <span class='m'>0</span>),
+    `NA` = <span class='nf'><a href='https://rdrr.io/pkg/formattable/man/comma.html'>comma</a></span>(<span class='k'>`NA`</span>, digits = <span class='m'>0</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/formattable/man/formattable.html'>formattable</a></span>()
+
+</code></pre>
+<table class="table table-condensed">
+<thead>
+<tr>
+<th style="text-align:right;">
+Year
+</th>
+<th style="text-align:right;">
+Percent Yes
+</th>
+<th style="text-align:right;">
+Percent NA
+</th>
+<th style="text-align:right;">
+Yes
+</th>
+<th style="text-align:right;">
+No
+</th>
+<th style="text-align:right;">
+NA
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+2013
+</td>
+<td style="text-align:right;">
+86.9%
+</td>
+<td style="text-align:right;">
+27.5%
+</td>
+<td style="text-align:right;">
+28,337
+</td>
+<td style="text-align:right;">
+4,273
+</td>
+<td style="text-align:right;">
+12,387
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2014
+</td>
+<td style="text-align:right;">
+85.7%
+</td>
+<td style="text-align:right;">
+26.9%
+</td>
+<td style="text-align:right;">
+28,080
+</td>
+<td style="text-align:right;">
+4,699
+</td>
+<td style="text-align:right;">
+12,089
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2015
+</td>
+<td style="text-align:right;">
+86.4%
+</td>
+<td style="text-align:right;">
+25.7%
+</td>
+<td style="text-align:right;">
+28,743
+</td>
+<td style="text-align:right;">
+4,518
+</td>
+<td style="text-align:right;">
+11,488
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2016
+</td>
+<td style="text-align:right;">
+81.8%
+</td>
+<td style="text-align:right;">
+20.2%
+</td>
+<td style="text-align:right;">
+29,233
+</td>
+<td style="text-align:right;">
+6,491
+</td>
+<td style="text-align:right;">
+9,015
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:right;">
+80.6%
+</td>
+<td style="text-align:right;">
+19.4%
+</td>
+<td style="text-align:right;">
+29,356
+</td>
+<td style="text-align:right;">
+7,084
+</td>
+<td style="text-align:right;">
+8,769
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2018
+</td>
+<td style="text-align:right;">
+80.5%
+</td>
+<td style="text-align:right;">
+17.3%
+</td>
+<td style="text-align:right;">
+30,264
+</td>
+<td style="text-align:right;">
+7,347
+</td>
+<td style="text-align:right;">
+7,864
+</td>
+</tr>
+</tbody>
+</table>
 
 </div>
 
@@ -158,7 +306,9 @@ While it looks like we have our answers there are two things that are wrong. Fir
 <span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
   <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>))
+
 <span class='c'>#&gt; `summarise()` regrouping output by 'hspd_int' (override with `.groups` argument)</span>
+
 
 <span class='c'># Pivot for easier percent calculations</span>
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
@@ -182,7 +332,8 @@ While it looks like we have our answers there are two things that are wrong. Fir
 <span class='c'>#   cols_move(</span>
 <span class='c'>#     columns = vars(percent_hspd, Yes, No, `NA`, percent_NA),</span>
 <span class='c'>#     after = vars(YEAR)</span>
-<span class='c'>#   )</span></code></pre>
+<span class='c'>#   )</span>
+</code></pre>
 
 </div>
 
@@ -211,7 +362,9 @@ So let's get to know the data a bit better by adding in internet access. We'll d
 <span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
   <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>int</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>))
+
 <span class='c'>#&gt; `summarise()` regrouping output by 'hspd_int', 'int' (override with `.groups` argument)</span>
+
 
 <span class='c'># Pivot for easier percent calculations</span>
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
@@ -241,7 +394,8 @@ So let's get to know the data a bit better by adding in internet access. We'll d
 <span class='c'>#   tab_row_group(</span>
 <span class='c'>#     group = "Yes",</span>
 <span class='c'>#     rows = int == "Yes"</span>
-<span class='c'>#   )</span></code></pre>
+<span class='c'>#   )</span>
+</code></pre>
 
 </div>
 
@@ -269,7 +423,9 @@ So what we were looking at was the percentage of people with internet who have h
 <span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
   <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>))
+
 <span class='c'>#&gt; `summarise()` regrouping output by 'hspd_int' (override with `.groups` argument)</span>
+
 
 <span class='c'># Pivot for easier percent calculations</span>
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
@@ -277,6 +433,7 @@ So what we were looking at was the percentage of people with internet who have h
   <span class='nf'>mutate</span>(percent_hspd = <span class='nf'><a href='https://rdrr.io/r/base/Round.html'>round</a></span>(<span class='m'>100</span> <span class='o'>*</span> (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)), <span class='m'>1</span>))
 
 <span class='k'>knitr</span>::<span class='nf'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span>(<span class='k'>df_wide</span>)
+
 </code></pre>
 
 |  YEAR|       No|      Yes|      NA|  percent\_hspd|
@@ -304,7 +461,9 @@ The census data includes individuals living in group quarters (mostly prisons, s
   <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='k'>GQ</span> <span class='o'>==</span> <span class='m'>1</span> <span class='o'>|</span> <span class='k'>GQ</span> <span class='o'>==</span><span class='m'>2</span> <span class='o'>|</span> <span class='k'>GQ</span> <span class='o'>==</span> <span class='m'>5</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>))
+
 <span class='c'>#&gt; `summarise()` regrouping output by 'hspd_int' (override with `.groups` argument)</span>
+
 
 <span class='c'># Pivot for easier percent calculations</span>
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
@@ -313,6 +472,7 @@ The census data includes individuals living in group quarters (mostly prisons, s
          percent_na = <span class='nf'><a href='https://rdrr.io/r/base/Round.html'>round</a></span>(<span class='m'>100</span> <span class='o'>*</span> (<span class='k'>`NA`</span><span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)), <span class='m'>1</span>))
 
 <span class='k'>knitr</span>::<span class='nf'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span>(<span class='k'>df_wide</span>)
+
 </code></pre>
 
 |  YEAR|       No|      Yes|      NA|  percent\_hspd|  percent\_na|
@@ -343,6 +503,7 @@ Mapping the Data
 <div class="highlight">
 
 <pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Internet Overall</span>
+
 </code></pre>
 
 </div>

@@ -37,7 +37,7 @@ I've put the data for just Kentucky up on GitHub, so I'll read it in from there 
 
 ```{r, message = FALSE}
 library(tidyverse)
-library(gt)
+library(formattable)
 
 df <- read_csv("https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv")
 
@@ -77,25 +77,21 @@ df_group <- df %>%
 df_wide <- df_group  %>%
   pivot_wider(id_cols = YEAR, names_from = hspd_int, values_from = count) %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_NA = (`NA` / (Yes + No + `NA`)))
+         percent_NA = (`NA` / (Yes + No + `NA`))) 
 
-# Using the GT package to format the table
-# df_wide %>%
-#   gt() %>%
-#   tab_header("Wrong High Speed Internet Results") %>%
-#   fmt_number(columns = vars(No, Yes, `NA`),
-#              decimals = 0) %>%
-#   fmt_percent(columns = vars(percent_hspd, percent_NA),
-#               decimals = 1) %>%
-#   cols_label(
-#     YEAR = "Year",
-#     percent_hspd = "Percent Yes",
-#     percent_NA = "Percent NA"
-#   ) %>%
-#   cols_move(
-#     columns = vars(percent_hspd, Yes, No, `NA`, percent_NA),
-#     after = vars(YEAR)
-#   )
+# Getting the data display ready using transmute, which combines mutate and select
+# Formattable is a bit nicer than kable and has some options for nice tables that we'll look at later
+# I really like the gt package for tables, but right now it doesn't work with hugodown or blogdown. 
+df_wide %>%
+  transmute(
+    Year = YEAR,
+    `Percent Yes` = percent(percent_hspd, digits = 1),
+    `Percent NA` = percent(percent_NA, digits = 1),
+    Yes = comma(Yes, digits = 0),
+    No = comma(No, digits = 0),
+    `NA` = comma(`NA`, digits = 0)
+  ) %>%
+  formattable()
 ```
 
 While it looks like we have our answers there are two things that are wrong. First, the Census data is weighted. Instead of a count of responses we want to weight them using the person weights the census provides. We can fix that with a pretty simple change - use `sum(PERWT)` instead of `n()` in getting the count of people with and without high speed internet. 
@@ -162,29 +158,6 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_NA = (`NA` / (Yes + No + `NA`)))
 
-
-# Using the GT package to format the table
-# df_wide %>%
-#   gt() %>%
-#   tab_header("Exploring Internet Results") %>%
-#   fmt_number(columns = vars(No, Yes, `NA`),
-#              decimals = 0) %>%
-#   fmt_percent(columns = vars(percent_hspd, percent_NA),
-#               decimals = 1) %>%
-#   cols_label(
-#     YEAR = "Year",
-#     percent_hspd = "Percent Yes",
-#     percent_NA = "Percent NA",
-#     int = "Internet Access"
-#   ) %>%
-#   cols_move(
-#     columns = vars(percent_hspd, Yes, No, `NA`, percent_NA),
-#     after = vars(YEAR)
-#   ) %>%
-#   tab_row_group(
-#     group = "Yes",
-#     rows = int == "Yes"
-#   )
 ```
 
 So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet. 
@@ -244,6 +217,64 @@ knitr::kable(df_wide)
 That removed about half of our NA values. It might be nice to know a bit more about the missing data, but at around 3 percent of observations it's unlikely to change our substantive conclusions. I suspect these are cases where there wasn't an answer for that question. We'll keep an eye on NA values as we do the analysis, because as we get into questions like how internet access varies by race, income, age, and education we'll want to know if NA answers are more or less likely in any of those categories. 
 
 # Analysis
+
+Going forward we're going to want to filter by group quarters, so let's apply that filter to our main dataframe.
+```{r}
+df <- df %>%
+    filter(GQ == 1 | GQ ==2 | GQ == 5) 
+```
+
+## Standard Errors
+
+Know that we know the data we'd also like to know how uncertain our sample is so that we know if movements over time are real or just a result of noisy data. There are a few ways to do this. The `survey` package does an excellent job with complex survey designs, but does require learning a new syntax to use. The alternative I'll use here is a method known as bootstrap. IPUMS suggests using bootstrap might be the best way to get standard errors on census microdata. The basic idea of the bootstrap is to resample the existing data and use the sampling error from that as an estimate for sampling error in the overall population. Let's do an example with high speed internet in 2018 to see how it works.
+
+```{r}
+# Filter to just 2018
+# Exclude NA values
+# Recode as numeric vector of 1 and 0
+# The numeric 1 and 0 form will make it much easier to get means without pivoting, which matters a lot when doing this 1000 times
+df2018 <- df %>%
+  filter(YEAR == 2018 & !is.na(hspd_int)) %>%
+  mutate(hspd_num = if_else(hspd_int == "Yes", 1, 0)) %>%
+  select(hspd_num, PERWT)
+
+# Write a function so I can map over it.
+# In this case, we need the function to do the same thing X number of times and assign an ID that we can use as a grouping variable
+create_samples <- function(sample_id){
+  df_out <- df2018[sample(nrow(df2018), nrow(df2018), replace = TRUE) , ] %>%
+    as_tibble()
+  df_out$sample_id <- sample_id
+  return(df_out)
+}
+
+nlist <- as.list(seq(1, 5000, by = 1))
+samples <- purrr::map_df(nlist, create_samples)
+
+sample_summary <- samples %>%
+  group_by(sample_id) %>%
+  mutate(ind_weight = PERWT / sum(PERWT),
+         hspd_weight = hspd_num * ind_weight) %>% # PERWT is population and doesn't sum to 1. Rescale it to sum to one
+  summarize(group_mean = sum(hspd_weight),
+            weight_check = sum(ind_weight)) # Check that my weights add up to one
+
+
+#Check that the distribution is normal and than the middle of the distribution is close to the 70.5% we estimated had internet access above
+plt <- ggplot(sample_summary, aes(group_mean)) +
+  geom_density() + theme_bw() +
+  labs(title = "Bootstrapped means of High Speed Internet Access",
+       x = "Mean", 
+       y = "Kernel Density")
+
+plt
+```
+
+```{r}
+bootstrap_pums <- function(df, n) {
+  
+}
+```
+
+
 
 ## Race, Poverty, and Geography
 
