@@ -254,6 +254,9 @@ df <- df %>%
 Know that we know the data we'd also like to know how uncertain our sample is so that we know if movements over time are real or just a result of noisy data. There are a few ways to do this. The `survey` package does an excellent job with complex survey designs, but does require learning a new syntax to use. The alternative I'll use here is a method known as bootstrap. IPUMS suggests using bootstrap might be the best way to get standard errors on census microdata. The basic idea of the bootstrap is to resample the existing data and use the sampling error from that as an estimate for sampling error in the overall population. Let's do an example with high speed internet in 2018 to see how it works. The output here will be the mean and standard deviation for Kentucky. (We'll use the standard error to calculate confidence intervals once we start displaying actual results.)
 
 ```{r}
+#set seed
+set.seed(42)
+
 # Filter to just 2018
 # Exclude NA values
 # Recode as numeric vector of 1 and 0
@@ -324,10 +327,14 @@ names(hint_tbl) <- c("mean", "sd") #The names weren't coerced correctly when tra
 formattable(hint_tbl)
 ```
 
+These results are very similar. Following the IPUMS recommendation we'll continue on with the bootstrap, but it's good to know the results are the same for practical purposes. So now instead of just doing 2018, we'll need to do every year. We've already one the mean values for every year, and they're still saved in the `df_wide` variable right now. So let's write a function for bootstrap that will let us find standard errors for every year or for any other grouping we choose. 
+
 
 ## Writing a bootstrap function
 ```{r}
-create_samples <- function(sample_id){
+# Create a helper function
+# It needs to have a way to recieve the dataframe from the function that calls it, so we've added a second argument
+create_samples <- function(sample_id, df){
   
   df_out <- df[sample(nrow(df), nrow(df), replace = TRUE) , ] %>%
     as_tibble()
@@ -341,28 +348,57 @@ create_samples <- function(sample_id){
 bootstrap_pums <- function(df, num_samples, group_vars) {
   
   nlist <- as.list(seq(1, num_samples, by = 1))
-  samples <- purrr::map_df(nlist, create_samples)
+  samples <- purrr::map_df(nlist, create_samples, df)
   
   sample_summary <- samples %>%
-    group_by(sample_id, group_vars) %>%
+    group_by( sample_id, {{group_vars}} ) %>%
     mutate(ind_weight = PERWT / sum(PERWT),
-           hspd_weight = hspd_num * ind_weight) %>% # PERWT is population and doesn't sum to 1. Rescale it to sum to one
+           hspd_weight = hspd_n * ind_weight) %>% # PERWT sums to population instead of to 1. Rescale it to sum to 1.
     summarize(group_mean = sum(hspd_weight))
   
   sample_sd <- sample_summary %>%
-    group_by(group_vars) %>%
-    summarize(sd = sd(group_mean))
+    group_by( {{ group_vars }} ) %>%
+    summarize(sd = sd(group_mean), .groups = "drop")
 }
+
+# We do need to prep the data a little so that we're not carrying through the whole dataframe.
+df_in <- df %>%
+  filter(!is.na(hspd_int)) %>%
+   mutate(hspd_n = if_else(hspd_int == "Yes", 1, 0)) %>%
+   select(hspd_n, PERWT, YEAR)
+
+# And finally we can call the function
+boot_results <- bootstrap_pums(df = df_in, num_samples = 100, group_vars = YEAR)
+
+boot_results %>%
+  formattable()
 ```
 
-## Internet over Time
+Now that we have our bootstrap standard errors we can combine them with the data and plot them. We'll use 95% confidence intervals, which we get by multiplying the 
+
+```{r}
+df_plt <- df_wide %>%
+  full_join(boot_results, by = "YEAR") %>%
+  transmute(Year = YEAR,
+            Percent = 100 * percent_hspd,
+            me = 100 * 1.96 * sd)
+  
+plt_int <- ggplot(df_plt, aes(x = Year, y = Percent)) +
+  geom_errorbar(aes(ymin = Percent - me, ymax = Percent + me), width = .1) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  labs(title = "High Speed Internet Access") +
+  theme(legend.position = "bottom")
+
+plt_int
+```
 
 
-## Race, Poverty, Geography, and Age
+## Race, Poverty, Age
 
 
-# Visualizing the Data
-
+## Geography
 
 
 # Mapping the Data
