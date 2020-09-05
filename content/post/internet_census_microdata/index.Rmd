@@ -33,24 +33,23 @@ projects: []
 
 The easiest way to get census microdata is through the Integrated Public Use Microdata Series (IPUMS) hosted by the University of Minnesota. While you can get the data directly from the Census Bureau, IPUMS has made it much easier to compare across multiple years and to select the variables you want. IPUMS also provides a codebook that is easy to refer to and notes any important changes from year to year. 
 
-I've put the data for just Kentucky up on GitHub, so I'll read it in from there and then we can take a quick look at it. I like `skimr::skim()` for taking a look at the data. When downloading the data it's all numeric, even for variables that are categorial - they've been coded and our first step in the analysis will be using the code book to translate them. 
+I've put the data for just Kentucky up on GitHub, so I'll read it in from there.
 
-```{r, message = FALSE}
-library(tidyverse)
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse) 
 library(formattable)
+library(survey)
 
 df <- read_csv("https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv")
-
-skimr::skim(df)
 ```
 
 # Cleaning the Data
 
-I won't show all the codebooks, but for this first variable let's take a look at what IPUMS has to say. For all years N/A is coded as 00 and No high speed internet is coded as 20. Prior to 2016 there are detailed codes for the type of internet access, while for 2016 and after the code is collapsed. 
+When downloading the data it's all numeric, even for variables that are categorial - they've been coded and our first step in the analysis will be using the code book to translate them. I won't show all the codebooks, but for this first variable let's take a look at what IPUMS has to say. For all years NA is coded as 00 and No high speed internet is coded as 20. Prior to 2016 there are detailed codes for the type of internet access, while for 2016 and after the code is collapsed. 
 
 ![](high_speed_code.png)
 
-Let's use 
+I'll use a `case_when()` statement to recode high speed interent access into a categorical variable.
 
 ```{r}
 # High Speed Internet
@@ -73,7 +72,7 @@ Now that we have a high speed internet category we can group the data and count 
 # Count numbers with and without high speed internet
 df_group <- df %>%
   group_by(hspd_int, YEAR) %>%
-  summarize(count = n())
+  summarize(count = n(), .groups = "drop")
 
 # Pivot for easier percent calculations
 df_wide <- df_group  %>%
@@ -110,28 +109,22 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_NA = (`NA` / (Yes + No + `NA`)))
 
-# Using the GT package to format the table
-# df_wide %>%
-#   gt() %>%
-#   tab_header("Weighted (but still wrong) High Speed Internet Results") %>%
-#   fmt_number(columns = vars(No, Yes, `NA`),
-#              decimals = 0) %>%
-#   fmt_percent(columns = vars(percent_hspd, percent_NA),
-#               decimals = 1) %>%
-#   cols_label(
-#     YEAR = "Year",
-#     percent_hspd = "Percent Yes",
-#     percent_NA = "Percent NA"
-#   ) %>%
-#   cols_move(
-#     columns = vars(percent_hspd, Yes, No, `NA`, percent_NA),
-#     after = vars(YEAR)
-#   )
+# Otput to formattable
+df_wide %>%
+  transmute(
+    Year = YEAR,
+    `Percent Yes` = percent(percent_hspd, digits = 1),
+    `Percent NA` = percent(percent_NA, digits = 1),
+    Yes = comma(Yes, digits = 0),
+    No = comma(No, digits = 0),
+    `NA` = comma(`NA`, digits = 0)
+  ) %>%
+  formattable()
 ```
 
 This is better. The second problem is harder to spot. There are 3 hints in the data:
 
-1. There are more NA values than there are people who said they don't have access, and in general a very high percentage of NA responses. 
+1. There is a very high percentage of NA responses. There are more NA answers than there are people who say they don't have high speed access.
 2. Percent of of people with high speed access is going down over time, while the number of NA answers is going up.
 3. These numbers look very high for Kentucky. 
 
@@ -152,14 +145,25 @@ df <- df %>%
 
 df_group <- df %>%
   group_by(hspd_int, int, YEAR) %>%
-  summarize(count = sum(PERWT))
+  summarize(count = sum(PERWT), .groups = "drop")
 
 # Pivot for easier percent calculations
 df_wide <- df_group  %>%
   pivot_wider(id_cols = c(YEAR, int), names_from = hspd_int, values_from = count) %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_NA = (`NA` / (Yes + No + `NA`)))
+         percent_na = (`NA` / (Yes + No + `NA`)))
 
+df_wide %>%
+  transmute(
+    Internet = int,
+    Year = YEAR,
+    `Percent Yes` = percent(percent_hspd, digits = 1),
+    `Percent NA` = percent(percent_na, digits = 1),
+    Yes = comma(Yes, digits = 0),
+    No = comma(No, digits = 0),
+    `NA` = comma(`NA`, digits = 0)
+  ) %>%
+  formattable()
 ```
 
 So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet. 
@@ -184,17 +188,27 @@ df <- df %>%
 # Count numbers with and without high speed internet
 df_group <- df %>%
   group_by(hspd_int, YEAR) %>%
-  summarize(count = sum(PERWT))
+  summarize(count = sum(PERWT), .groups = "drop")
 
 # Pivot for easier percent calculations
 df_wide <- df_group  %>%
   pivot_wider(id_cols = c(YEAR), names_from = hspd_int, values_from = count) %>%
-  mutate(percent_hspd = round(100 * (Yes / (Yes + No)), 1))
+  mutate(percent_hspd = (Yes / (Yes + No)),
+         percent_na = (`NA` / (Yes + No + `NA`)))
 
-knitr::kable(df_wide)
+df_wide %>%
+  transmute(
+    Year = YEAR,
+    `Percent Yes` = percent(percent_hspd, digits = 1),
+    `Percent NA` = percent(percent_na, digits = 1),
+    Yes = comma(Yes, digits = 0),
+    No = comma(No, digits = 0),
+    `NA` = comma(`NA`, digits = 0)
+  ) %>%
+  formattable()
 ```
 
-These results look much better, although still quite a few N/A results. 
+These results look much better, although still quite a few NA results. 
 
 ## Group Quarters in the Census
 
@@ -205,15 +219,24 @@ The census data includes individuals living in group quarters (mostly prisons, s
 df_group <- df %>%
   filter(GQ == 1 | GQ ==2 | GQ == 5) %>%
   group_by(hspd_int, YEAR) %>%
-  summarize(count = sum(PERWT))
+  summarize(count = sum(PERWT), .groups = "drop")
 
 # Pivot for easier percent calculations
 df_wide <- df_group  %>%
   pivot_wider(id_cols = c(YEAR), names_from = hspd_int, values_from = count) %>%
-  mutate(percent_hspd = round(100 * (Yes / (Yes + No)), 1),
-         percent_na = round(100 * (`NA`/ (Yes + No + `NA`)), 1))
+  mutate(percent_hspd = (Yes / (Yes + No)),
+         percent_na = (`NA` / (Yes + No + `NA`)))
 
-knitr::kable(df_wide)
+df_wide %>%
+  transmute(
+    Year = YEAR,
+    `Percent Yes` = percent(percent_hspd, digits = 1),
+    `Percent NA` = percent(percent_na, digits = 1),
+    Yes = comma(Yes, digits = 0),
+    No = comma(No, digits = 0),
+    `NA` = comma(`NA`, digits = 0)
+  ) %>%
+  formattable()
 ```
 
 That removed about half of our NA values. It might be nice to know a bit more about the missing data, but at around 3 percent of observations it's unlikely to change our substantive conclusions. I suspect these are cases where there wasn't an answer for that question. We'll keep an eye on NA values as we do the analysis, because as we get into questions like how internet access varies by race, income, age, and education we'll want to know if NA answers are more or less likely in any of those categories. 
@@ -228,7 +251,7 @@ df <- df %>%
 
 ## Standard Errors
 
-Know that we know the data we'd also like to know how uncertain our sample is so that we know if movements over time are real or just a result of noisy data. There are a few ways to do this. The `survey` package does an excellent job with complex survey designs, but does require learning a new syntax to use. The alternative I'll use here is a method known as bootstrap. IPUMS suggests using bootstrap might be the best way to get standard errors on census microdata. The basic idea of the bootstrap is to resample the existing data and use the sampling error from that as an estimate for sampling error in the overall population. Let's do an example with high speed internet in 2018 to see how it works.
+Know that we know the data we'd also like to know how uncertain our sample is so that we know if movements over time are real or just a result of noisy data. There are a few ways to do this. The `survey` package does an excellent job with complex survey designs, but does require learning a new syntax to use. The alternative I'll use here is a method known as bootstrap. IPUMS suggests using bootstrap might be the best way to get standard errors on census microdata. The basic idea of the bootstrap is to resample the existing data and use the sampling error from that as an estimate for sampling error in the overall population. Let's do an example with high speed internet in 2018 to see how it works. The output here will be the mean and standard deviation for Kentucky. (We'll use the standard error to calculate confidence intervals once we start displaying actual results.)
 
 ```{r}
 # Filter to just 2018
@@ -257,11 +280,20 @@ sample_summary <- samples %>%
   mutate(ind_weight = PERWT / sum(PERWT),
          hspd_weight = hspd_num * ind_weight) %>% # PERWT is population and doesn't sum to 1. Rescale it to sum to one
   summarize(group_mean = sum(hspd_weight),
-            weight_check = sum(ind_weight)) # Check that my weights add up to one
+            weight_check = sum(ind_weight), .groups = "drop") # Check that my weights add up to one
 
-sample_sd <- sd(sample_summary$group_mean)
+display_tbl <- tibble(
+  mean = mean(sample_summary$group_mean),
+  sd = sd(sample_summary$group_mean)
+) 
 
+display_tbl %>% 
+  formattable()
 
+```
+
+We can also take a look at our bootstrap graphically. We want to check that the distribution of the sample is roughly normal. If it's not, that means we didn't do enough bootstrap samples for the Central Limit Theorem to kick in. 
+```{r}
 #Check that the distribution is normal and than the middle of the distribution is close to the 70.5% we estimated had internet access above
 plt <- ggplot(sample_summary, aes(group_mean)) +
   geom_density() + theme_bw() +
@@ -285,6 +317,9 @@ svy_df <- svydesign(ids = ~ 1, weights = ~PERWT, data = df2018)
 
 # Taking the mean and standard error from our design object
 hint_tbl <- svymean(~hspd_num, design = svy_df)
+
+hint_tbl <- as_tibble(hint_tbl)
+names(hint_tbl) <- c("mean", "sd") #The names weren't coerced correctly when transforming into a tibble. 
 
 formattable(hint_tbl)
 ```
@@ -319,6 +354,8 @@ bootstrap_pums <- function(df, num_samples, group_vars) {
     summarize(sd = sd(group_mean))
 }
 ```
+
+## Internet over Time
 
 
 ## Race, Poverty, Geography, and Age
