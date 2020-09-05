@@ -50,6 +50,8 @@ I won't show all the codebooks, but for this first variable let's take a look at
 
 ![](high_speed_code.png)
 
+Let's use 
+
 ```{r}
 # High Speed Internet
 df <- df %>%
@@ -257,6 +259,8 @@ sample_summary <- samples %>%
   summarize(group_mean = sum(hspd_weight),
             weight_check = sum(ind_weight)) # Check that my weights add up to one
 
+sample_sd <- sd(sample_summary$group_mean)
+
 
 #Check that the distribution is normal and than the middle of the distribution is close to the 70.5% we estimated had internet access above
 plt <- ggplot(sample_summary, aes(group_mean)) +
@@ -268,15 +272,57 @@ plt <- ggplot(sample_summary, aes(group_mean)) +
 plt
 ```
 
+## Checking our results against the survey package
+
+Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap). So here's the code to take our same `df2018` dataframe and use the survey package.
 ```{r}
-bootstrap_pums <- function(df, n) {
+library(survey)
+
+# Here we're assuming a simple design. 
+# Survey requires the creation of a design object and then has functions that work with that object.
+# You can get more complicated, which is when the survey package would be most useful.
+svy_df <- svydesign(ids = ~ 1, weights = ~PERWT, data = df2018)
+
+# Taking the mean and standard error from our design object
+hint_tbl <- svymean(~hspd_num, design = svy_df)
+
+formattable(hint_tbl)
+```
+
+
+## Writing a bootstrap function
+```{r}
+create_samples <- function(sample_id){
   
+  df_out <- df[sample(nrow(df), nrow(df), replace = TRUE) , ] %>%
+    as_tibble()
+  
+  df_out$sample_id <- sample_id
+  
+  return(df_out)
+}
+
+#Need to be able to take in grouping variables so that the summaries can be specific to the groups
+bootstrap_pums <- function(df, num_samples, group_vars) {
+  
+  nlist <- as.list(seq(1, num_samples, by = 1))
+  samples <- purrr::map_df(nlist, create_samples)
+  
+  sample_summary <- samples %>%
+    group_by(sample_id, group_vars) %>%
+    mutate(ind_weight = PERWT / sum(PERWT),
+           hspd_weight = hspd_num * ind_weight) %>% # PERWT is population and doesn't sum to 1. Rescale it to sum to one
+    summarize(group_mean = sum(hspd_weight))
+  
+  sample_sd <- sample_summary %>%
+    group_by(group_vars) %>%
+    summarize(sd = sd(group_mean))
 }
 ```
 
 
+## Race, Poverty, Geography, and Age
 
-## Race, Poverty, and Geography
 
 # Visualizing the Data
 
