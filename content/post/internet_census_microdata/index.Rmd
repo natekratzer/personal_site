@@ -37,6 +37,7 @@ I've put the data for just Kentucky up on GitHub, so I'll read it in from there.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse) 
+library(gt)
 library(formattable)
 library(survey)
 
@@ -83,17 +84,33 @@ df_wide <- df_group  %>%
 # Getting the data display ready using transmute, which combines mutate and select
 # Formattable is a bit nicer than kable and has some options for nice tables that we'll look at later
 # I really like the gt package for tables, but right now it doesn't work with hugodown or blogdown. 
+# Turns out formattable doesn't work either
+# Using the GT package to format the table
+
+
 df_wide %>%
-  transmute(
-    Year = YEAR,
-    `Percent Yes` = percent(percent_hspd, digits = 1),
-    `Percent NA` = percent(percent_NA, digits = 1),
-    Yes = comma(Yes, digits = 0),
-    No = comma(No, digits = 0),
-    `NA` = comma(`NA`, digits = 0)
+  gt() %>%
+  tab_header("Wrong High Speed Internet Results") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             decimals = 0) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_NA),
+              decimals = 1) %>%
+  cols_label(
+    YEAR = "Year",
+    percent_hspd = "Percent Yes",
+    percent_NA = "Percent NA"
   ) %>%
-  formattable()
+  cols_move(
+    columns = vars(percent_hspd, percent_NA, Yes, No, `NA`),
+    after = vars(YEAR)
+  ) %>%
+  gtsave("table_test.png")
+
+# I thought after saving I'd call the image, but in turns out it gets called automatically
+
 ```
+
+
 
 While it looks like we have our answers there are two things that are wrong. First, the Census data is weighted. Instead of a count of responses we want to weight them using the person weights the census provides. We can fix that with a pretty simple change - use `sum(PERWT)` instead of `n()` in getting the count of people with and without high speed internet. 
 
@@ -109,17 +126,6 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_NA = (`NA` / (Yes + No + `NA`)))
 
-# Otput to formattable
-df_wide %>%
-  transmute(
-    Year = YEAR,
-    `Percent Yes` = percent(percent_hspd, digits = 1),
-    `Percent NA` = percent(percent_NA, digits = 1),
-    Yes = comma(Yes, digits = 0),
-    No = comma(No, digits = 0),
-    `NA` = comma(`NA`, digits = 0)
-  ) %>%
-  formattable()
 ```
 
 This is better. The second problem is harder to spot. There are 3 hints in the data:
@@ -153,17 +159,7 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_na = (`NA` / (Yes + No + `NA`)))
 
-df_wide %>%
-  transmute(
-    Internet = int,
-    Year = YEAR,
-    `Percent Yes` = percent(percent_hspd, digits = 1),
-    `Percent NA` = percent(percent_na, digits = 1),
-    Yes = comma(Yes, digits = 0),
-    No = comma(No, digits = 0),
-    `NA` = comma(`NA`, digits = 0)
-  ) %>%
-  formattable()
+
 ```
 
 So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet. 
@@ -196,16 +192,6 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_na = (`NA` / (Yes + No + `NA`)))
 
-df_wide %>%
-  transmute(
-    Year = YEAR,
-    `Percent Yes` = percent(percent_hspd, digits = 1),
-    `Percent NA` = percent(percent_na, digits = 1),
-    Yes = comma(Yes, digits = 0),
-    No = comma(No, digits = 0),
-    `NA` = comma(`NA`, digits = 0)
-  ) %>%
-  formattable()
 ```
 
 These results look much better, although still quite a few NA results. 
@@ -229,20 +215,6 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_na = (`NA` / (Yes + No + `NA`)))
 
-hspd_table <- df_wide %>%
-  transmute(
-    Year = YEAR,
-    `Percent Yes` = percent(percent_hspd, digits = 1),
-    `Percent NA` = percent(percent_na, digits = 1),
-    Yes = comma(Yes, digits = 0),
-    No = comma(No, digits = 0),
-    `NA` = comma(`NA`, digits = 0)
-  ) %>%
-  formattable(align = c(rep("l", 6)),
-              list(
-                `Percent Yes` = color_bar("lightblue"),
-                `Percent NA` = color_bar("lightgrey")
-              ))
 ```
 
 That removed about half of our NA values. It might be nice to know a bit more about the missing data, but at around 3 percent of observations it's unlikely to change our substantive conclusions. I suspect these are cases where there wasn't an answer for that question. We'll keep an eye on NA values as we do the analysis, because as we get into questions like how internet access varies by race, income, age, and education we'll want to know if NA answers are more or less likely in any of those categories. 
@@ -302,9 +274,6 @@ display_tbl <- tibble(
   sd = sd(sample_summary$group_mean)
 ) 
 
-display_tbl %>% 
-  formattable()
-
 ```
 
 We can also take a look at our bootstrap graphically. We want to check that the distribution of the sample is roughly normal. If it's not, that means we didn't do enough bootstrap samples for the Central Limit Theorem to kick in. 
@@ -337,7 +306,6 @@ hint_tbl <- svymean(~hspd_num, design = svy_df)
 hint_tbl <- as_tibble(hint_tbl)
 names(hint_tbl) <- c("mean", "sd") #The names weren't coerced correctly when transforming into a tibble. 
 
-formattable(hint_tbl)
 ```
 
 These results are very similar. Following the IPUMS recommendation we'll continue on with the bootstrap, but it's good to know the results are the same for practical purposes. So now instead of just doing 2018, we'll need to do every year. We've already one the mean values for every year, and they're still saved in the `df_wide` variable right now. So let's write a function for bootstrap that will let us find standard errors for every year or for any other grouping we choose. 
@@ -383,8 +351,6 @@ df_in <- df %>%
 # And finally we can call the function
 boot_results <- bootstrap_pums(df = df_in, num_samples = 100, group_vars = YEAR)
 
-boot_results %>%
-  formattable()
 ```
 
 Now that we have our bootstrap standard errors we can combine them with the data and plot them. We'll use 95% confidence intervals, which we get by multiplying the 
@@ -437,21 +403,6 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_na = (`NA` / (Yes + No + `NA`)))
 
-df_wide %>%
-  transmute(
-    Year = YEAR,
-    Race = race,
-    `Percent Yes` = percent(percent_hspd, digits = 1),
-    `Percent NA` = percent(percent_na, digits = 1),
-    Yes = comma(Yes, digits = 0),
-    No = comma(No, digits = 0),
-    `NA` = comma(`NA`, digits = 0)
-  ) %>%
-  formattable(align = c(rep("l", 7)),
-              list(
-                `Percent Yes` = color_tile("#ff7f7f", "lightgreen"),
-                `Percent NA` = color_tile("lightgreen", "#ff7f7f")
-              ))
 
 ```
 
@@ -519,17 +470,6 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_na = (`NA` / (Yes + No + `NA`)))
 
-df_wide %>%
-  transmute(
-    Year = YEAR,
-    Poverty = poverty,
-    `Percent Yes` = percent(percent_hspd, digits = 1),
-    `Percent NA` = percent(percent_na, digits = 1),
-    Yes = comma(Yes, digits = 0),
-    No = comma(No, digits = 0),
-    `NA` = comma(`NA`, digits = 0)
-  ) %>%
-  formattable()
 ```
 
 
