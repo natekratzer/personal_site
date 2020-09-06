@@ -29,10 +29,24 @@ image:
 projects: []
 ---
 
-```{r}
-x <- 1:10
-y <- 1:10
+```{r, echo = FALSE}
+library(tidyverse)
 
-plot(x, y)
+df <- tibble(
+  x = 1:4,
+  y = c("a", "a", "b", "b")
+
+)
+
+make_groups <- function(df, group_var){
+  df <- df %>%
+    group_by({{group_var}}) %>%
+    summarize(mean = mean(x))
+}
+
+df <- df %>%
+  make_groups(y)
+
+print(df)
 ```
 
