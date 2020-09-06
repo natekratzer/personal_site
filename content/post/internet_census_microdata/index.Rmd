@@ -91,25 +91,40 @@ df_group <- df %>%
 df_wide <- df_group  %>%
   pivot_wider(id_cols = YEAR, names_from = hspd_int, values_from = count) %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
+         percent_no = 1 - percent_hspd,
          percent_NA = (`NA` / (Yes + No + `NA`)))
 
 df_wide %>%
   gt() %>%
-  tab_header("Wrong High Speed Internet Results") %>%
+  tab_header(title = "Table 1: Quick Analysis",
+             subtitle = "These results are wrong!") %>%
   fmt_number(columns = vars(No, Yes, `NA`),
-             decimals = 0) %>%
-  fmt_percent(columns = vars(percent_hspd, percent_NA),
-              decimals = 1) %>%
-  cols_label(
-    YEAR = "Year",
-    percent_hspd = "Percent Yes",
-    percent_NA = "Percent NA"
+             n_sigfig = 3,
+             suffixing = TRUE) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_no, percent_NA),
+              decimals = 0) %>%
+  cols_label(YEAR = "Year",
+             percent_hspd = "Yes",
+             percent_no = "No",
+             percent_NA = "NA") %>%
+  cols_move(columns = vars(percent_hspd, percent_no, percent_NA, Yes, No, `NA`),
+            after = vars(YEAR)) %>%
+  tab_spanner(
+    label = "Number of People",
+    columns = vars(Yes, No, `NA`)
   ) %>%
-  cols_move(
-    columns = vars(percent_hspd, percent_NA, Yes, No, `NA`),
-    after = vars(YEAR)
+  tab_spanner(
+    label = "Percent",
+    columns = vars(percent_hspd, percent_no, percent_NA)
   ) %>%
-  gtsave("table_test.png")
+  cols_align(align = "center") %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("table_test.png", zoom = 5)
 ```
 
 This is better. The second problem is harder to spot. There are 3 hints in the data:
@@ -273,7 +288,9 @@ plt
 
 ## Checking our results against the survey package
 
-Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap).
+Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap). For some reason hugodown has problems with this chunk of code, so I've had to pull it in as an image, which is why it's not formatted quite the same way.
+
+![](survey_code_chunk.png)
 ```{r, echo = FALSE}
 library(survey)
 

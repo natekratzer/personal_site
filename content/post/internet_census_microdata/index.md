@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: e26441cf31d54cd8
+rmd_hash: 410dd30d679f32fa
 
 ---
 
@@ -109,25 +109,40 @@ Now that we have a high speed internet category we can group the data and count 
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
   <span class='nf'>pivot_wider</span>(id_cols = <span class='k'>YEAR</span>, names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
+         percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
          percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
 
 <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
-  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(<span class='s'>"Wrong High Speed Internet Results"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 1: Quick Analysis"</span>,
+             subtitle = <span class='s'>"These results are wrong!"</span>) <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_number.html'>fmt_number</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>No</span>, <span class='k'>Yes</span>, <span class='k'>`NA`</span>),
-             decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
-  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_NA</span>),
-              decimals = <span class='m'>1</span>) <span class='o'>%&gt;%</span>
-  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(
-    YEAR = <span class='s'>"Year"</span>,
-    percent_hspd = <span class='s'>"Percent Yes"</span>,
-    percent_NA = <span class='s'>"Percent NA"</span>
+             n_sigfig = <span class='m'>3</span>,
+             suffixing = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>),
+              decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(YEAR = <span class='s'>"Year"</span>,
+             percent_hspd = <span class='s'>"Yes"</span>,
+             percent_no = <span class='s'>"No"</span>,
+             percent_NA = <span class='s'>"NA"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
+            after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Number of People"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>)
   ) <span class='o'>%&gt;%</span>
-  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(
-    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
-    after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Percent"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>)
   ) <span class='o'>%&gt;%</span>
-  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"table_test.png"</span>)
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_align.html'>cols_align</a></span>(align = <span class='s'>"center"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"table_test.png"</span>, zoom = <span class='m'>5</span>)
 
 </code></pre>
 <img src="figs/unnamed-chunk-4-1.png" width="700px" style="display: block; margin: auto;" />
@@ -281,7 +296,9 @@ We can also take a look at our bootstrap graphically. We want to check that the 
 Checking our results against the survey package
 -----------------------------------------------
 
-Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap).
+Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap). For some reason hugodown has problems with this chunk of code, so I've had to pull it in as an image, which is why it's not formatted quite the same way.
+
+![](survey_code_chunk.png)
 
 <div class="highlight">
 
