@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: ba78118a7ed542ef
+rmd_hash: 721e989937135f67
 
 ---
 
@@ -42,7 +42,6 @@ I've put the data for just Kentucky up on GitHub, so I'll read it in from there.
 
 <pre class='chroma'><code class='language-r' data-lang='r'><span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='http://tidyverse.tidyverse.org'>tidyverse</a></span>) 
 <span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='https://github.com/rstudio/gt'>gt</a></span>)
-<span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='https://renkun.me/formattable'>formattable</a></span>)
 <span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='http://r-survey.r-forge.r-project.org/survey/'>survey</a></span>)
 
 <span class='k'>df</span> <span class='o'>&lt;-</span> <span class='nf'>read_csv</span>(<span class='s'>"https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv"</span>)
@@ -94,9 +93,7 @@ Now that we have a high speed internet category we can group the data and count 
          percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))) 
 
 <span class='c'># Getting the data display ready using transmute, which combines mutate and select</span>
-<span class='c'># Formattable is a bit nicer than kable and has some options for nice tables that we'll look at later</span>
 <span class='c'># I really like the gt package for tables, but right now it doesn't work with hugodown or blogdown. </span>
-<span class='c'># Turns out formattable doesn't work either</span>
 <span class='c'># Using the GT package to format the table</span>
 
 

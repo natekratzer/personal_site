@@ -38,7 +38,6 @@ I've put the data for just Kentucky up on GitHub, so I'll read it in from there.
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse) 
 library(gt)
-library(formattable)
 library(survey)
 
 df <- read_csv("https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv")
@@ -82,9 +81,7 @@ df_wide <- df_group  %>%
          percent_NA = (`NA` / (Yes + No + `NA`))) 
 
 # Getting the data display ready using transmute, which combines mutate and select
-# Formattable is a bit nicer than kable and has some options for nice tables that we'll look at later
 # I really like the gt package for tables, but right now it doesn't work with hugodown or blogdown. 
-# Turns out formattable doesn't work either
 # Using the GT package to format the table
 
 
