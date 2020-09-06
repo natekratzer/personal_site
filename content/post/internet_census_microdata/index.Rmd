@@ -11,7 +11,7 @@ categories: []
 date: 2020-08-29
 lastmod: 2020-08-29
 featured: false
-draft: true
+draft: false
 
 # Featured image
 # To use, add an image named `featured.jpg/png` to your page's folder.
@@ -212,7 +212,9 @@ These results look much better, although still quite a few NA results.
 
 ## Group Quarters in the Census
 
-The census data includes individuals living in group quarters (mostly prisons, senior living centers, and dorms, but includes any sort of communal living arrangement). However, all census questions about appliances and utilities (the category that internet access falls under) are NA for group quarters. So we'll add one more line to filter out individuals living in group quarters (a common practice when working with microdata). The code below adds a filter for Group Quarters and then also adds a column to show the percent of all responses that are NA. 
+The census data includes individuals living in group quarters (mostly prisons, senior living centers, and dorms, but includes any sort of communal living arrangement). However, all census questions about appliances and utilities (the category that internet access falls under) are NA for group quarters. So we'll add one more line to filter out individuals living in group quarters (a common practice when working with microdata). The code below adds a filter for Group Quarters. Since this table is showing correct results I'll also add a little additional formatting to make it stand out from the others.
+
+I'll also note that the way the Census Bureau constructs weights is very convenient for getting totals. While I'm focusing on the percent of people who have internet access, the Yes and No columns are accurate estimates of the population with and without access. 
 
 ```{r}
 # Count numbers with and without high speed internet
@@ -227,7 +229,7 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_na = (`NA` / (Yes + No + `NA`)))
 
-df_wide %>%
+hspd_table <- df_wide %>%
   transmute(
     Year = YEAR,
     `Percent Yes` = percent(percent_hspd, digits = 1),
@@ -236,10 +238,20 @@ df_wide %>%
     No = comma(No, digits = 0),
     `NA` = comma(`NA`, digits = 0)
   ) %>%
-  formattable()
+  formattable(align = c(rep("l", 6)),
+              list(
+                `Percent Yes` = color_bar("lightblue"),
+                `Percent NA` = color_bar("lightgrey")
+              ))
 ```
 
 That removed about half of our NA values. It might be nice to know a bit more about the missing data, but at around 3 percent of observations it's unlikely to change our substantive conclusions. I suspect these are cases where there wasn't an answer for that question. We'll keep an eye on NA values as we do the analysis, because as we get into questions like how internet access varies by race, income, age, and education we'll want to know if NA answers are more or less likely in any of those categories. 
+
+## Checking against data.census.gov
+
+To do a quick check against the way the census bureau itself analyzes the data I looked at data.census.gov for 2018 in Kentucky. An important note is that their data is for households, and so their numeric counts look quite different because I'm counting number of people. They also have a breakdown where cellular is included in broadband, which I do not want, as a cell phone is not really an adequate work or study device. So to get to what I have we need to add "Broadband such as cable, fiber optic or DSL" and "Satellite Internet service", which gets us to 70.8% compared to the 70.5% in this analysis. The difference is small and most likely the result of their analysis being weighted to the household level rather than the person level. (Internet is measured at the household level and the same for every person in the household, but by choosing to weight it at the person level I am a) letting us talk in terms of people, b) giving more weight to larger households, c) making it possible to breakdown internet access by categories that do vary by household, like age). 
+
+![](data_census_gov.png)
 
 # Analysis
 
@@ -296,6 +308,7 @@ display_tbl %>%
 ```
 
 We can also take a look at our bootstrap graphically. We want to check that the distribution of the sample is roughly normal. If it's not, that means we didn't do enough bootstrap samples for the Central Limit Theorem to kick in. 
+
 ```{r}
 #Check that the distribution is normal and than the middle of the distribution is close to the 70.5% we estimated had internet access above
 plt <- ggplot(sample_summary, aes(group_mean)) +
@@ -351,19 +364,19 @@ bootstrap_pums <- function(df, num_samples, group_vars) {
   samples <- purrr::map_df(nlist, create_samples, df)
   
   sample_summary <- samples %>%
-    group_by( sample_id, {{group_vars}} ) %>%
+    group_by( sample_id, across( {{group_vars}} )) %>%
     mutate(ind_weight = PERWT / sum(PERWT),
            hspd_weight = hspd_n * ind_weight) %>% # PERWT sums to population instead of to 1. Rescale it to sum to 1.
-    summarize(group_mean = sum(hspd_weight))
+    summarize(group_mean = sum(hspd_weight), .groups = "drop") # Not dropping .groups here results in problems in the next group_by call.
   
   sample_sd <- sample_summary %>%
-    group_by( {{ group_vars }} ) %>%
+    group_by( across( {{ group_vars }} )) %>%
     summarize(sd = sd(group_mean), .groups = "drop")
 }
 
 # We do need to prep the data a little so that we're not carrying through the whole dataframe.
 df_in <- df %>%
-  filter(!is.na(hspd_int)) %>%
+   filter(!is.na(hspd_int)) %>%
    mutate(hspd_n = if_else(hspd_int == "Yes", 1, 0)) %>%
    select(hspd_n, PERWT, YEAR)
 
@@ -397,11 +410,143 @@ plt_int
 
 ## Race, Poverty, Age
 
+### Race
+
+We'll build a table by race and year. It's a long table, so I've added some color to both the `Percent Yes` column and the `Percent NA` column. For the NA column I'm using red to pick out cases where the NA values were particularly high, because we want to see if there's a pattern there. For the Percent Yes column I'm checking to see where the values are particularly low.
+
+```{r}
+# Let's build a table first and then we'll do the standard errors
+
+# Coding a race variable using case_when
+df <- df %>%
+  mutate(race = case_when(
+            RACE == 1 ~ "White",
+            RACE == 2 ~ "Black",
+            RACE > 3 & RACE < 7 ~ "Asian",
+            HISPAN > 0 & HISPAN < 5 ~ "Hispanic",
+            TRUE ~ "All Others"
+          ))
+
+df_group <- df %>%
+  group_by(hspd_int, race, YEAR) %>%
+  summarize(count = sum(PERWT), .groups = "drop")
+
+# Pivot for easier percent calculations
+df_wide <- df_group  %>%
+  pivot_wider(id_cols = c(race, YEAR), names_from = hspd_int, values_from = count) %>%
+  mutate(percent_hspd = (Yes / (Yes + No)),
+         percent_na = (`NA` / (Yes + No + `NA`)))
+
+df_wide %>%
+  transmute(
+    Year = YEAR,
+    Race = race,
+    `Percent Yes` = percent(percent_hspd, digits = 1),
+    `Percent NA` = percent(percent_na, digits = 1),
+    Yes = comma(Yes, digits = 0),
+    No = comma(No, digits = 0),
+    `NA` = comma(`NA`, digits = 0)
+  ) %>%
+  formattable(align = c(rep("l", 7)),
+              list(
+                `Percent Yes` = color_tile("#ff7f7f", "lightgreen"),
+                `Percent NA` = color_tile("lightgreen", "#ff7f7f")
+              ))
+
+```
+
+While we do see high NA values in some years
+
+
+
+Now let's add standard errors and graph the data. 
+```{r}
+# We do need to prep the data a little so that we're not carrying through the whole dataframe.
+df_in <- df %>%
+  filter(!is.na(hspd_int)) %>%
+  mutate(hspd_n = if_else(hspd_int == "Yes", 1, 0)) %>%
+  select(hspd_n, PERWT, YEAR, race)
+
+# And we can call the bootstrap function
+boot_results <- bootstrap_pums(df = df_in, num_samples = 100, group_vars = c(YEAR, race))
+
+df_plt <- df_wide %>%
+  full_join(boot_results, by = c("race", "YEAR")) %>%
+  transmute(Year = YEAR,
+            Race = race,
+            Percent = 100 * percent_hspd,
+            me = 100 * 1.96 * sd) %>%
+  filter(Race != "All Others") # When plotting All Others overlaps White and having five lines makes it quite hard to read. 
+
+# At this point I'll introduce a function to plot multiple groups over time, since we'll use this again 
+
+plt_by <- function(df, group_var, title_text = "High Speed Internet Access by Race and Ethnicity") {
+  
+  plt <- ggplot(data = df, aes(x = Year, y = Percent, group = {{group_var}}, colour = {{group_var}})) +
+    geom_errorbar(aes(ymin = Percent - me, ymax = Percent + me), width = .1) +
+    geom_point() +
+    geom_line() +
+    theme_bw() +
+    labs(title = title_text, x = "Year", y = "Percent") +
+    theme(legend.position = "bottom")
+
+  plt
+}
+
+plt_race <- plt_by(df_plt, Race)
+
+plt_race
+```
+
+## Poverty Status
+
+```{r}
+# Coding a race variable using case_when
+df <- df %>%
+  mutate(poverty = case_when(
+            POVERTY <= 100 ~ "In Poverty",
+            POVERTY > 100 & POVERTY <= 200 ~ "Near Poverty",
+            TRUE ~ "Not in Poverty"
+          ))
+
+df_group <- df %>%
+  group_by(hspd_int, poverty, YEAR) %>%
+  summarize(count = sum(PERWT), .groups = "drop")
+
+# Pivot for easier percent calculations
+df_wide <- df_group  %>%
+  pivot_wider(id_cols = c(poverty, YEAR), names_from = hspd_int, values_from = count) %>%
+  mutate(percent_hspd = (Yes / (Yes + No)),
+         percent_na = (`NA` / (Yes + No + `NA`)))
+
+df_wide %>%
+  transmute(
+    Year = YEAR,
+    Poverty = poverty,
+    `Percent Yes` = percent(percent_hspd, digits = 1),
+    `Percent NA` = percent(percent_na, digits = 1),
+    Yes = comma(Yes, digits = 0),
+    No = comma(No, digits = 0),
+    `NA` = comma(`NA`, digits = 0)
+  ) %>%
+  formattable()
+```
+
+
+## Age
 
 ## Geography
 
+Urban v. Suburban v. Rural
+
 
 # Mapping the Data
+
+## All of Kentucky
+
+## Children 5-18
+
+We'll also take a count of children 5-18 in Kentucky
 
 ```{r}
 # Internet Overall
