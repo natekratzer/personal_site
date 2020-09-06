@@ -50,7 +50,7 @@ When downloading the data it's all numeric, even for variables that are categori
 
 I'll use a `case_when()` statement to recode high speed interent access into a categorical variable.
 
-```{r, eval = FALSE}
+```{r}
 # High Speed Internet
 df <- df %>%
   mutate(
@@ -67,7 +67,7 @@ df <- df %>%
 
 Now that we have a high speed internet category we can group the data and count up how many responses are in each group. I'll also pivot the dataframe to make it easy to calculate percent with high speed internet. 
 
-```{r, eval = FALSE}
+```{r}
 # Count numbers with and without high speed internet
 df_group <- df %>%
   group_by(hspd_int, YEAR) %>%
@@ -80,12 +80,7 @@ df_wide <- df_group  %>%
          percent_NA = (`NA` / (Yes + No + `NA`))) 
 ```
 
-
-
-
-While it looks like we have our answers there are two things that are wrong. First, the Census data is weighted. Instead of a count of responses we want to weight them using the person weights the census provides. We can fix that with a pretty simple change - use `sum(PERWT)` instead of `n()` in getting the count of people with and without high speed internet. 
-
-```{r, eval = FALSE}
+```{r}
 # Count numbers with and without high speed internet
 df_group <- df %>%
   group_by(hspd_int, YEAR) %>%
@@ -109,7 +104,7 @@ A sensible guess is that people who say they don't have internet access at all a
 
 So let's get to know the data a bit better by adding in internet access. We'll do the same analysis, but I'll add internet as another id variable just like year. We can see right away that the answers we have above are only including cases where individuals have internet. 
 
-```{r, eval = FALSE}
+```{r}
 df <- df %>%
   mutate(
     int = case_when(
@@ -129,13 +124,11 @@ df_wide <- df_group  %>%
   pivot_wider(id_cols = c(YEAR, int), names_from = hspd_int, values_from = count) %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_na = (`NA` / (Yes + No + `NA`)))
-
-
 ```
 
 So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet. 
 
-```{r, eval = FALSE}
+```{r}
 df <- df %>%
   mutate(
     int = case_when(
@@ -173,7 +166,7 @@ The census data includes individuals living in group quarters (mostly prisons, s
 
 I'll also note that the way the Census Bureau constructs weights is very convenient for getting totals. While I'm focusing on the percent of people who have internet access, the Yes and No columns are accurate estimates of the population with and without access. 
 
-```{r, eval = FALSE}
+```{r}
 # Count numbers with and without high speed internet
 df_group <- df %>%
   filter(GQ == 1 | GQ ==2 | GQ == 5) %>%
@@ -199,7 +192,7 @@ To do a quick check against the way the census bureau itself analyzes the data I
 # Analysis
 
 Going forward we're going to want to filter by group quarters, so let's apply that filter to our main dataframe.
-```{r, eval = FALSE}
+```{r}
 df <- df %>%
     filter(GQ == 1 | GQ ==2 | GQ == 5) 
 ```
@@ -208,7 +201,7 @@ df <- df %>%
 
 Know that we know the data we'd also like to know how uncertain our sample is so that we know if movements over time are real or just a result of noisy data. There are a few ways to do this. The `survey` package does an excellent job with complex survey designs, but does require learning a new syntax to use. The alternative I'll use here is a method known as bootstrap. IPUMS suggests using bootstrap might be the best way to get standard errors on census microdata. The basic idea of the bootstrap is to resample the existing data and use the sampling error from that as an estimate for sampling error in the overall population. Let's do an example with high speed internet in 2018 to see how it works. The output here will be the mean and standard deviation for Kentucky. (We'll use the standard error to calculate confidence intervals once we start displaying actual results.)
 
-```{r, eval = FALSE}
+```{r, echo = FALSE}
 #set seed
 set.seed(42)
 
@@ -249,7 +242,7 @@ display_tbl <- tibble(
 
 We can also take a look at our bootstrap graphically. We want to check that the distribution of the sample is roughly normal. If it's not, that means we didn't do enough bootstrap samples for the Central Limit Theorem to kick in. 
 
-```{r, eval = FALSE}
+```{r}
 #Check that the distribution is normal and than the middle of the distribution is close to the 70.5% we estimated had internet access above
 plt <- ggplot(sample_summary, aes(group_mean)) +
   geom_density() + theme_bw() +
@@ -262,8 +255,8 @@ plt
 
 ## Checking our results against the survey package
 
-Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap). So here's the code to take our same `df2018` dataframe and use the survey package.
-```{r, eval = FALSE}
+Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap).
+```{r, echo = FALSE}
 library(survey)
 
 # Here we're assuming a simple design. 
@@ -276,14 +269,13 @@ hint_tbl <- svymean(~hspd_num, design = svy_df)
 
 hint_tbl <- as_tibble(hint_tbl)
 names(hint_tbl) <- c("mean", "sd") #The names weren't coerced correctly when transforming into a tibble. 
-
 ```
 
 These results are very similar. Following the IPUMS recommendation we'll continue on with the bootstrap, but it's good to know the results are the same for practical purposes. So now instead of just doing 2018, we'll need to do every year. We've already one the mean values for every year, and they're still saved in the `df_wide` variable right now. So let's write a function for bootstrap that will let us find standard errors for every year or for any other grouping we choose. 
 
 
 ## Writing a bootstrap function
-```{r, eval = FALSE}
+```{r, echo = FALSE}
 # Create a helper function
 # It needs to have a way to recieve the dataframe from the function that calls it, so we've added a second argument
 create_samples <- function(sample_id, df){
@@ -321,12 +313,11 @@ df_in <- df %>%
 
 # And finally we can call the function
 boot_results <- bootstrap_pums(df = df_in, num_samples = 100, group_vars = YEAR)
-
 ```
 
-Now that we have our bootstrap standard errors we can combine them with the data and plot them. We'll use 95% confidence intervals, which we get by multiplying the 
+Now that we have our bootstrap standard errors we can combine them with the data and plot them. We'll use 95% confidence intervals, which we get by multiplying the standard error by 1.96 (the number of standard deviations that corresponds to a 95% confidence interval).
 
-```{r, eval = FALSE}
+```{r}
 df_plt <- df_wide %>%
   full_join(boot_results, by = "YEAR") %>%
   transmute(Year = YEAR,
@@ -351,7 +342,7 @@ plt_int
 
 We'll build a table by race and year. It's a long table, so I've added some color to both the `Percent Yes` column and the `Percent NA` column. For the NA column I'm using red to pick out cases where the NA values were particularly high, because we want to see if there's a pattern there. For the Percent Yes column I'm checking to see where the values are particularly low.
 
-```{r, eval = FALSE}
+```{r}
 # Let's build a table first and then we'll do the standard errors
 
 # Coding a race variable using case_when
@@ -380,9 +371,8 @@ df_wide <- df_group  %>%
 While we do see high NA values in some years
 
 
-
 Now let's add standard errors and graph the data. 
-```{r, eval = FALSE}
+```{r}
 # We do need to prep the data a little so that we're not carrying through the whole dataframe.
 df_in <- df %>%
   filter(!is.na(hspd_int)) %>%
@@ -422,7 +412,7 @@ plt_race
 
 ## Poverty Status
 
-```{r, eval = FALSE}
+```{r}
 # Coding a race variable using case_when
 df <- df %>%
   mutate(poverty = case_when(
@@ -458,5 +448,28 @@ Urban v. Suburban v. Rural
 ## Children 5-18
 
 We'll also take a count of children 5-18 in Kentucky
+
+```{r}
+# Internet Overall
+
+```
+
+
+
+## Age
+
+## Geography
+
+Urban v. Suburban v. Rural
+
+
+# Mapping the Data
+
+## All of Kentucky
+
+## Children 5-18
+
+We'll also take a count of children 5-18 in Kentucky
+
 
 

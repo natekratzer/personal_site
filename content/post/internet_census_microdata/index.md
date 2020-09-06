@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: b46cb6dacd764eaf
+rmd_hash: cea2bb3a46cca1d8
 
 ---
 
@@ -237,43 +237,6 @@ Know that we know the data we'd also like to know how uncertain our sample is so
 
 <div class="highlight">
 
-<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'>#set seed</span>
-<span class='nf'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='m'>42</span>)
-
-<span class='c'># Filter to just 2018</span>
-<span class='c'># Exclude NA values</span>
-<span class='c'># Recode as numeric vector of 1 and 0</span>
-<span class='c'># The numeric 1 and 0 form will make it much easier to get means without pivoting, which matters a lot when doing this 1000 times</span>
-<span class='k'>df2018</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
-  <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='k'>YEAR</span> <span class='o'>==</span> <span class='m'>2018</span> <span class='o'>&amp;</span> <span class='o'>!</span><span class='nf'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='k'>hspd_int</span>)) <span class='o'>%&gt;%</span>
-  <span class='nf'>mutate</span>(hspd_num = <span class='nf'>if_else</span>(<span class='k'>hspd_int</span> <span class='o'>==</span> <span class='s'>"Yes"</span>, <span class='m'>1</span>, <span class='m'>0</span>)) <span class='o'>%&gt;%</span>
-  <span class='nf'>select</span>(<span class='k'>hspd_num</span>, <span class='k'>PERWT</span>)
-
-<span class='c'># Write a function so I can map over it.</span>
-<span class='c'># In this case, we need the function to do the same thing X number of times and assign an ID that we can use as a grouping variable</span>
-<span class='k'>create_samples</span> <span class='o'>&lt;-</span> <span class='nf'>function</span>(<span class='k'>sample_id</span>){
-  <span class='k'>df_out</span> <span class='o'>&lt;-</span> <span class='k'>df2018</span>[<span class='nf'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span>(<span class='nf'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='k'>df2018</span>), <span class='nf'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='k'>df2018</span>), replace = <span class='kc'>TRUE</span>) , ] <span class='o'>%&gt;%</span>
-    <span class='nf'>as_tibble</span>()
-  <span class='k'>df_out</span><span class='o'>$</span><span class='k'>sample_id</span> <span class='o'>&lt;-</span> <span class='k'>sample_id</span>
-  <span class='nf'><a href='https://rdrr.io/r/base/function.html'>return</a></span>(<span class='k'>df_out</span>)
-}
-
-<span class='k'>nlist</span> <span class='o'>&lt;-</span> <span class='nf'><a href='https://rdrr.io/r/base/list.html'>as.list</a></span>(<span class='nf'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='m'>1</span>, <span class='m'>5000</span>, by = <span class='m'>1</span>))
-<span class='k'>samples</span> <span class='o'>&lt;-</span> <span class='k'>purrr</span>::<span class='nf'><a href='https://purrr.tidyverse.org/reference/map.html'>map_df</a></span>(<span class='k'>nlist</span>, <span class='k'>create_samples</span>)
-
-<span class='k'>sample_summary</span> <span class='o'>&lt;-</span> <span class='k'>samples</span> <span class='o'>%&gt;%</span>
-  <span class='nf'>group_by</span>(<span class='k'>sample_id</span>) <span class='o'>%&gt;%</span>
-  <span class='nf'>mutate</span>(ind_weight = <span class='k'>PERWT</span> <span class='o'>/</span> <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>),
-         hspd_weight = <span class='k'>hspd_num</span> <span class='o'>*</span> <span class='k'>ind_weight</span>) <span class='o'>%&gt;%</span> <span class='c'># PERWT is population and doesn't sum to 1. Rescale it to sum to one</span>
-  <span class='nf'>summarize</span>(group_mean = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>hspd_weight</span>),
-            weight_check = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>ind_weight</span>), .groups = <span class='s'>"drop"</span>) <span class='c'># Check that my weights add up to one</span>
-
-<span class='k'>display_tbl</span> <span class='o'>&lt;-</span> <span class='nf'>tibble</span>(
-  mean = <span class='nf'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span>(<span class='k'>sample_summary</span><span class='o'>$</span><span class='k'>group_mean</span>),
-  sd = <span class='nf'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span>(<span class='k'>sample_summary</span><span class='o'>$</span><span class='k'>group_mean</span>)
-) 
-</code></pre>
-
 </div>
 
 We can also take a look at our bootstrap graphically. We want to check that the distribution of the sample is roughly normal. If it's not, that means we didn't do enough bootstrap samples for the Central Limit Theorem to kick in.
@@ -291,6 +254,184 @@ We can also take a look at our bootstrap graphically. We want to check that the 
 
 </code></pre>
 <img src="figs/unnamed-chunk-10-1.png" width="700px" style="display: block; margin: auto;" />
+
+</div>
+
+Checking our results against the survey package
+-----------------------------------------------
+
+Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap).
+
+<div class="highlight">
+
+</div>
+
+These results are very similar. Following the IPUMS recommendation we'll continue on with the bootstrap, but it's good to know the results are the same for practical purposes. So now instead of just doing 2018, we'll need to do every year. We've already one the mean values for every year, and they're still saved in the `df_wide` variable right now. So let's write a function for bootstrap that will let us find standard errors for every year or for any other grouping we choose.
+
+Writing a bootstrap function
+----------------------------
+
+<div class="highlight">
+
+</div>
+
+Now that we have our bootstrap standard errors we can combine them with the data and plot them. We'll use 95% confidence intervals, which we get by multiplying the standard error by 1.96 (the number of standard deviations that corresponds to a 95% confidence interval).
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='k'>df_plt</span> <span class='o'>&lt;-</span> <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>full_join</span>(<span class='k'>boot_results</span>, by = <span class='s'>"YEAR"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>transmute</span>(Year = <span class='k'>YEAR</span>,
+            Percent = <span class='m'>100</span> <span class='o'>*</span> <span class='k'>percent_hspd</span>,
+            me = <span class='m'>100</span> <span class='o'>*</span> <span class='m'>1.96</span> <span class='o'>*</span> <span class='k'>sd</span>)
+  
+<span class='k'>plt_int</span> <span class='o'>&lt;-</span> <span class='nf'>ggplot</span>(<span class='k'>df_plt</span>, <span class='nf'>aes</span>(x = <span class='k'>Year</span>, y = <span class='k'>Percent</span>)) <span class='o'>+</span>
+  <span class='nf'>geom_errorbar</span>(<span class='nf'>aes</span>(ymin = <span class='k'>Percent</span> <span class='o'>-</span> <span class='k'>me</span>, ymax = <span class='k'>Percent</span> <span class='o'>+</span> <span class='k'>me</span>), width = <span class='m'>.1</span>) <span class='o'>+</span>
+  <span class='nf'>geom_line</span>() <span class='o'>+</span>
+  <span class='nf'>geom_point</span>() <span class='o'>+</span>
+  <span class='nf'>theme_bw</span>() <span class='o'>+</span>
+  <span class='nf'>labs</span>(title = <span class='s'>"High Speed Internet Access"</span>) <span class='o'>+</span>
+  <span class='nf'>theme</span>(legend.position = <span class='s'>"bottom"</span>)
+
+<span class='k'>plt_int</span>
+
+</code></pre>
+<img src="figs/unnamed-chunk-13-1.png" width="700px" style="display: block; margin: auto;" />
+
+</div>
+
+Race, Poverty, Age
+------------------
+
+### Race
+
+We'll build a table by race and year. It's a long table, so I've added some color to both the `Percent Yes` column and the `Percent NA` column. For the NA column I'm using red to pick out cases where the NA values were particularly high, because we want to see if there's a pattern there. For the Percent Yes column I'm checking to see where the values are particularly low.
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Let's build a table first and then we'll do the standard errors</span>
+
+<span class='c'># Coding a race variable using case_when</span>
+<span class='k'>df</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(race = <span class='nf'>case_when</span>(
+            <span class='k'>RACE</span> <span class='o'>==</span> <span class='m'>1</span> <span class='o'>~</span> <span class='s'>"White"</span>,
+            <span class='k'>RACE</span> <span class='o'>==</span> <span class='m'>2</span> <span class='o'>~</span> <span class='s'>"Black"</span>,
+            <span class='k'>RACE</span> <span class='o'>&gt;</span> <span class='m'>3</span> <span class='o'>&amp;</span> <span class='k'>RACE</span> <span class='o'>&lt;</span> <span class='m'>7</span> <span class='o'>~</span> <span class='s'>"Asian"</span>,
+            <span class='k'>HISPAN</span> <span class='o'>&gt;</span> <span class='m'>0</span> <span class='o'>&amp;</span> <span class='k'>HISPAN</span> <span class='o'>&lt;</span> <span class='m'>5</span> <span class='o'>~</span> <span class='s'>"Hispanic"</span>,
+            <span class='kc'>TRUE</span> <span class='o'>~</span> <span class='s'>"All Others"</span>
+          ))
+
+<span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>race</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>), .groups = <span class='s'>"drop"</span>)
+
+<span class='c'># Pivot for easier percent calculations</span>
+<span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
+  <span class='nf'>pivot_wider</span>(id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>race</span>, <span class='k'>YEAR</span>), names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
+         percent_na = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+
+</code></pre>
+
+</div>
+
+While we do see high NA values in some years
+
+Now let's add standard errors and graph the data.
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># We do need to prep the data a little so that we're not carrying through the whole dataframe.</span>
+<span class='k'>df_in</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='o'>!</span><span class='nf'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='k'>hspd_int</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(hspd_n = <span class='nf'>if_else</span>(<span class='k'>hspd_int</span> <span class='o'>==</span> <span class='s'>"Yes"</span>, <span class='m'>1</span>, <span class='m'>0</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>select</span>(<span class='k'>hspd_n</span>, <span class='k'>PERWT</span>, <span class='k'>YEAR</span>, <span class='k'>race</span>)
+
+<span class='c'># And we can call the bootstrap function</span>
+<span class='k'>boot_results</span> <span class='o'>&lt;-</span> <span class='nf'>bootstrap_pums</span>(df = <span class='k'>df_in</span>, num_samples = <span class='m'>100</span>, group_vars = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>, <span class='k'>race</span>))
+
+<span class='k'>df_plt</span> <span class='o'>&lt;-</span> <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>full_join</span>(<span class='k'>boot_results</span>, by = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='s'>"race"</span>, <span class='s'>"YEAR"</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>transmute</span>(Year = <span class='k'>YEAR</span>,
+            Race = <span class='k'>race</span>,
+            Percent = <span class='m'>100</span> <span class='o'>*</span> <span class='k'>percent_hspd</span>,
+            me = <span class='m'>100</span> <span class='o'>*</span> <span class='m'>1.96</span> <span class='o'>*</span> <span class='k'>sd</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='k'>Race</span> != <span class='s'>"All Others"</span>) <span class='c'># When plotting All Others overlaps White and having five lines makes it quite hard to read. </span>
+
+<span class='c'># At this point I'll introduce a function to plot multiple groups over time, since we'll use this again </span>
+
+<span class='k'>plt_by</span> <span class='o'>&lt;-</span> <span class='nf'>function</span>(<span class='k'>df</span>, <span class='k'>group_var</span>, <span class='k'>title_text</span> = <span class='s'>"High Speed Internet Access by Race and Ethnicity"</span>) {
+  
+  <span class='k'>plt</span> <span class='o'>&lt;-</span> <span class='nf'>ggplot</span>(data = <span class='k'>df</span>, <span class='nf'>aes</span>(x = <span class='k'>Year</span>, y = <span class='k'>Percent</span>, group = {{<span class='k'>group_var</span>}}, colour = {{<span class='k'>group_var</span>}})) <span class='o'>+</span>
+    <span class='nf'>geom_errorbar</span>(<span class='nf'>aes</span>(ymin = <span class='k'>Percent</span> <span class='o'>-</span> <span class='k'>me</span>, ymax = <span class='k'>Percent</span> <span class='o'>+</span> <span class='k'>me</span>), width = <span class='m'>.1</span>) <span class='o'>+</span>
+    <span class='nf'>geom_point</span>() <span class='o'>+</span>
+    <span class='nf'>geom_line</span>() <span class='o'>+</span>
+    <span class='nf'>theme_bw</span>() <span class='o'>+</span>
+    <span class='nf'>labs</span>(title = <span class='k'>title_text</span>, x = <span class='s'>"Year"</span>, y = <span class='s'>"Percent"</span>) <span class='o'>+</span>
+    <span class='nf'>theme</span>(legend.position = <span class='s'>"bottom"</span>)
+
+  <span class='k'>plt</span>
+}
+
+<span class='k'>plt_race</span> <span class='o'>&lt;-</span> <span class='nf'>plt_by</span>(<span class='k'>df_plt</span>, <span class='k'>Race</span>)
+
+<span class='k'>plt_race</span>
+
+</code></pre>
+<img src="figs/unnamed-chunk-15-1.png" width="700px" style="display: block; margin: auto;" />
+
+</div>
+
+Poverty Status
+--------------
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Coding a race variable using case_when</span>
+<span class='k'>df</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(poverty = <span class='nf'>case_when</span>(
+            <span class='k'>POVERTY</span> <span class='o'>&lt;=</span> <span class='m'>100</span> <span class='o'>~</span> <span class='s'>"In Poverty"</span>,
+            <span class='k'>POVERTY</span> <span class='o'>&gt;</span> <span class='m'>100</span> <span class='o'>&amp;</span> <span class='k'>POVERTY</span> <span class='o'>&lt;=</span> <span class='m'>200</span> <span class='o'>~</span> <span class='s'>"Near Poverty"</span>,
+            <span class='kc'>TRUE</span> <span class='o'>~</span> <span class='s'>"Not in Poverty"</span>
+          ))
+
+<span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>poverty</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>), .groups = <span class='s'>"drop"</span>)
+
+<span class='c'># Pivot for easier percent calculations</span>
+<span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
+  <span class='nf'>pivot_wider</span>(id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>poverty</span>, <span class='k'>YEAR</span>), names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
+         percent_na = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+</code></pre>
+
+</div>
+
+Age
+---
+
+Geography
+---------
+
+Urban v. Suburban v. Rural
+
+Mapping the Data
+================
+
+All of Kentucky
+---------------
+
+Children 5-18
+-------------
+
+We'll also take a count of children 5-18 in Kentucky
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Internet Overall</span>
+
+</code></pre>
 
 </div>
 
