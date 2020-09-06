@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 721e989937135f67
+rmd_hash: 2f17b75e1fc38a45
 
 ---
 
@@ -91,12 +91,15 @@ Now that we have a high speed internet category we can group the data and count 
   <span class='nf'>pivot_wider</span>(id_cols = <span class='k'>YEAR</span>, names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
          percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))) 
+</code></pre>
 
-<span class='c'># Getting the data display ready using transmute, which combines mutate and select</span>
+</div>
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Getting the data display ready using transmute, which combines mutate and select</span>
 <span class='c'># I really like the gt package for tables, but right now it doesn't work with hugodown or blogdown. </span>
 <span class='c'># Using the GT package to format the table</span>
-
-
 <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(<span class='s'>"Wrong High Speed Internet Results"</span>) <span class='o'>%&gt;%</span>
@@ -115,13 +118,12 @@ Now that we have a high speed internet category we can group the data and count 
   ) <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"table_test.png"</span>)
 
-</code></pre>
-<img src="figs/unnamed-chunk-3-1.png" width="700px" style="display: block; margin: auto;" />
-<pre class='chroma'><code class='language-r' data-lang='r'>
 <span class='c'># I thought after saving I'd call the image, but in turns out it gets called automatically</span>
 </code></pre>
 
 </div>
+
+![](table_test.png)
 
 While it looks like we have our answers there are two things that are wrong. First, the Census data is weighted. Instead of a count of responses we want to weight them using the person weights the census provides. We can fix that with a pretty simple change - use [`sum(PERWT)`](https://rdrr.io/r/base/sum.html) instead of `n()` in getting the count of people with and without high speed internet.
 
@@ -322,7 +324,7 @@ We can also take a look at our bootstrap graphically. We want to check that the 
 <span class='k'>plt</span>
 
 </code></pre>
-<img src="figs/unnamed-chunk-10-1.png" width="700px" style="display: block; margin: auto;" />
+<img src="figs/unnamed-chunk-11-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
@@ -418,7 +420,7 @@ Now that we have our bootstrap standard errors we can combine them with the data
 <span class='k'>plt_int</span>
 
 </code></pre>
-<img src="figs/unnamed-chunk-13-1.png" width="700px" style="display: block; margin: auto;" />
+<img src="figs/unnamed-chunk-14-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
@@ -500,7 +502,7 @@ Now let's add standard errors and graph the data.
 <span class='k'>plt_race</span>
 
 </code></pre>
-<img src="figs/unnamed-chunk-15-1.png" width="700px" style="display: block; margin: auto;" />
+<img src="figs/unnamed-chunk-16-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 

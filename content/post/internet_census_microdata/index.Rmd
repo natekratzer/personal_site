@@ -79,12 +79,13 @@ df_wide <- df_group  %>%
   pivot_wider(id_cols = YEAR, names_from = hspd_int, values_from = count) %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_NA = (`NA` / (Yes + No + `NA`))) 
+```
 
+
+```{r, eval = FALSE}
 # Getting the data display ready using transmute, which combines mutate and select
 # I really like the gt package for tables, but right now it doesn't work with hugodown or blogdown. 
 # Using the GT package to format the table
-
-
 df_wide %>%
   gt() %>%
   tab_header("Wrong High Speed Internet Results") %>%
@@ -104,9 +105,9 @@ df_wide %>%
   gtsave("table_test.png")
 
 # I thought after saving I'd call the image, but in turns out it gets called automatically
-
 ```
 
+![](table_test.png)
 
 
 While it looks like we have our answers there are two things that are wrong. First, the Census data is weighted. Instead of a count of responses we want to weight them using the person weights the census provides. We can fix that with a pretty simple change - use `sum(PERWT)` instead of `n()` in getting the count of people with and without high speed internet. 
