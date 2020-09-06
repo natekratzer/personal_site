@@ -50,7 +50,7 @@ When downloading the data it's all numeric, even for variables that are categori
 
 I'll use a `case_when()` statement to recode high speed interent access into a categorical variable.
 
-```{r}
+```{r, eval = FALSE}
 # High Speed Internet
 df <- df %>%
   mutate(
@@ -67,7 +67,7 @@ df <- df %>%
 
 Now that we have a high speed internet category we can group the data and count up how many responses are in each group. I'll also pivot the dataframe to make it easy to calculate percent with high speed internet. 
 
-```{r}
+```{r, eval = FALSE}
 # Count numbers with and without high speed internet
 df_group <- df %>%
   group_by(hspd_int, YEAR) %>%
@@ -85,7 +85,7 @@ df_wide <- df_group  %>%
 
 While it looks like we have our answers there are two things that are wrong. First, the Census data is weighted. Instead of a count of responses we want to weight them using the person weights the census provides. We can fix that with a pretty simple change - use `sum(PERWT)` instead of `n()` in getting the count of people with and without high speed internet. 
 
-```{r}
+```{r, eval = FALSE}
 # Count numbers with and without high speed internet
 df_group <- df %>%
   group_by(hspd_int, YEAR) %>%
@@ -109,7 +109,7 @@ A sensible guess is that people who say they don't have internet access at all a
 
 So let's get to know the data a bit better by adding in internet access. We'll do the same analysis, but I'll add internet as another id variable just like year. We can see right away that the answers we have above are only including cases where individuals have internet. 
 
-```{r}
+```{r, eval = FALSE}
 df <- df %>%
   mutate(
     int = case_when(
