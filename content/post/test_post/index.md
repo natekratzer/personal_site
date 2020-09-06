@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: ad43738a39e2b119
+rmd_hash: 824ab508c7e39078
 
 ---
 
@@ -36,7 +36,11 @@ rmd_hash: ad43738a39e2b119
 <pre class='chroma'><code class='language-r' data-lang='r'><span class='k'>x</span> <span class='o'>&lt;-</span> <span class='m'>1</span><span class='o'>:</span><span class='m'>10</span>
 <span class='k'>y</span> <span class='o'>&lt;-</span> <span class='m'>1</span><span class='o'>:</span><span class='m'>10</span>
 
-<span class='nf'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='k'>x</span>, <span class='k'>y</span>)
+<span class='k'>my_plot</span> <span class='o'>&lt;-</span> <span class='nf'>function</span>(<span class='k'>x</span>, <span class='k'>y</span>) {
+  <span class='nf'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='k'>x</span>, <span class='k'>y</span>)
+}
+
+<span class='nf'>my_plot</span>(<span class='k'>x</span>, <span class='k'>y</span>)
 
 </code></pre>
 <img src="figs/unnamed-chunk-1-1.png" width="700px" style="display: block; margin: auto;" />
