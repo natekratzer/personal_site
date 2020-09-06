@@ -11,7 +11,7 @@ categories: []
 date: 2020-08-29
 lastmod: 2020-08-29
 featured: false
-draft: true
+draft: false
 
 # Featured image
 # To use, add an image named `featured.jpg/png` to your page's folder.
@@ -37,7 +37,6 @@ I've put the data for just Kentucky up on GitHub, so I'll read it in from there.
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse) 
-library(gt)
 library(survey)
 
 df <- read_csv("https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv")
@@ -136,7 +135,7 @@ df_wide <- df_group  %>%
 
 So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet. 
 
-```{r}
+```{r, eval = FALSE}
 df <- df %>%
   mutate(
     int = case_when(
@@ -174,7 +173,7 @@ The census data includes individuals living in group quarters (mostly prisons, s
 
 I'll also note that the way the Census Bureau constructs weights is very convenient for getting totals. While I'm focusing on the percent of people who have internet access, the Yes and No columns are accurate estimates of the population with and without access. 
 
-```{r}
+```{r, eval = FALSE}
 # Count numbers with and without high speed internet
 df_group <- df %>%
   filter(GQ == 1 | GQ ==2 | GQ == 5) %>%
@@ -200,7 +199,7 @@ To do a quick check against the way the census bureau itself analyzes the data I
 # Analysis
 
 Going forward we're going to want to filter by group quarters, so let's apply that filter to our main dataframe.
-```{r}
+```{r, eval = FALSE}
 df <- df %>%
     filter(GQ == 1 | GQ ==2 | GQ == 5) 
 ```
@@ -209,7 +208,7 @@ df <- df %>%
 
 Know that we know the data we'd also like to know how uncertain our sample is so that we know if movements over time are real or just a result of noisy data. There are a few ways to do this. The `survey` package does an excellent job with complex survey designs, but does require learning a new syntax to use. The alternative I'll use here is a method known as bootstrap. IPUMS suggests using bootstrap might be the best way to get standard errors on census microdata. The basic idea of the bootstrap is to resample the existing data and use the sampling error from that as an estimate for sampling error in the overall population. Let's do an example with high speed internet in 2018 to see how it works. The output here will be the mean and standard deviation for Kentucky. (We'll use the standard error to calculate confidence intervals once we start displaying actual results.)
 
-```{r}
+```{r, eval = FALSE}
 #set seed
 set.seed(42)
 
@@ -250,7 +249,7 @@ display_tbl <- tibble(
 
 We can also take a look at our bootstrap graphically. We want to check that the distribution of the sample is roughly normal. If it's not, that means we didn't do enough bootstrap samples for the Central Limit Theorem to kick in. 
 
-```{r}
+```{r, eval = FALSE}
 #Check that the distribution is normal and than the middle of the distribution is close to the 70.5% we estimated had internet access above
 plt <- ggplot(sample_summary, aes(group_mean)) +
   geom_density() + theme_bw() +
@@ -264,7 +263,7 @@ plt
 ## Checking our results against the survey package
 
 Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap). So here's the code to take our same `df2018` dataframe and use the survey package.
-```{r}
+```{r, eval = FALSE}
 library(survey)
 
 # Here we're assuming a simple design. 
@@ -284,7 +283,7 @@ These results are very similar. Following the IPUMS recommendation we'll continu
 
 
 ## Writing a bootstrap function
-```{r}
+```{r, eval = FALSE}
 # Create a helper function
 # It needs to have a way to recieve the dataframe from the function that calls it, so we've added a second argument
 create_samples <- function(sample_id, df){
@@ -327,7 +326,7 @@ boot_results <- bootstrap_pums(df = df_in, num_samples = 100, group_vars = YEAR)
 
 Now that we have our bootstrap standard errors we can combine them with the data and plot them. We'll use 95% confidence intervals, which we get by multiplying the 
 
-```{r}
+```{r, eval = FALSE}
 df_plt <- df_wide %>%
   full_join(boot_results, by = "YEAR") %>%
   transmute(Year = YEAR,
@@ -352,7 +351,7 @@ plt_int
 
 We'll build a table by race and year. It's a long table, so I've added some color to both the `Percent Yes` column and the `Percent NA` column. For the NA column I'm using red to pick out cases where the NA values were particularly high, because we want to see if there's a pattern there. For the Percent Yes column I'm checking to see where the values are particularly low.
 
-```{r}
+```{r, eval = FALSE}
 # Let's build a table first and then we'll do the standard errors
 
 # Coding a race variable using case_when
@@ -383,7 +382,7 @@ While we do see high NA values in some years
 
 
 Now let's add standard errors and graph the data. 
-```{r}
+```{r, eval = FALSE}
 # We do need to prep the data a little so that we're not carrying through the whole dataframe.
 df_in <- df %>%
   filter(!is.na(hspd_int)) %>%
@@ -423,7 +422,7 @@ plt_race
 
 ## Poverty Status
 
-```{r}
+```{r, eval = FALSE}
 # Coding a race variable using case_when
 df <- df %>%
   mutate(poverty = case_when(
@@ -460,8 +459,4 @@ Urban v. Suburban v. Rural
 
 We'll also take a count of children 5-18 in Kentucky
 
-```{r}
-# Internet Overall
-
-```
 
