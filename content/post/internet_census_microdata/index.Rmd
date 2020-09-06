@@ -36,7 +36,8 @@ The easiest way to get census microdata is through the Integrated Public Use Mic
 I've put the data for just Kentucky up on GitHub, so I'll read it in from there.
 
 ```{r, message = FALSE, warning = FALSE}
-library(tidyverse) 
+library(tidyverse)
+library(gt)
 library(survey)
 
 df <- read_csv("https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv")
@@ -92,6 +93,23 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_NA = (`NA` / (Yes + No + `NA`)))
 
+df_wide %>%
+  gt() %>%
+  tab_header("Wrong High Speed Internet Results") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             decimals = 0) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_NA),
+              decimals = 1) %>%
+  cols_label(
+    YEAR = "Year",
+    percent_hspd = "Percent Yes",
+    percent_NA = "Percent NA"
+  ) %>%
+  cols_move(
+    columns = vars(percent_hspd, percent_NA, Yes, No, `NA`),
+    after = vars(YEAR)
+  ) %>%
+  gtsave("table_test.png")
 ```
 
 This is better. The second problem is harder to spot. There are 3 hints in the data:

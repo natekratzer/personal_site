@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 7273b3dfa1fa07e3
+rmd_hash: e26441cf31d54cd8
 
 ---
 
@@ -40,7 +40,8 @@ I've put the data for just Kentucky up on GitHub, so I'll read it in from there.
 
 <div class="highlight">
 
-<pre class='chroma'><code class='language-r' data-lang='r'><span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='http://tidyverse.tidyverse.org'>tidyverse</a></span>) 
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='http://tidyverse.tidyverse.org'>tidyverse</a></span>)
+<span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='https://github.com/rstudio/gt'>gt</a></span>)
 <span class='nf'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='k'><a href='http://r-survey.r-forge.r-project.org/survey/'>survey</a></span>)
 
 <span class='k'>df</span> <span class='o'>&lt;-</span> <span class='nf'>read_csv</span>(<span class='s'>"https://raw.github.com/natekratzer/raw_data/master/ky_high_speed_internet.csv"</span>)
@@ -109,7 +110,27 @@ Now that we have a high speed internet category we can group the data and count 
   <span class='nf'>pivot_wider</span>(id_cols = <span class='k'>YEAR</span>, names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
          percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+
+<span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(<span class='s'>"Wrong High Speed Internet Results"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_number.html'>fmt_number</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>No</span>, <span class='k'>Yes</span>, <span class='k'>`NA`</span>),
+             decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_NA</span>),
+              decimals = <span class='m'>1</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(
+    YEAR = <span class='s'>"Year"</span>,
+    percent_hspd = <span class='s'>"Percent Yes"</span>,
+    percent_NA = <span class='s'>"Percent NA"</span>
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
+    after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"table_test.png"</span>)
+
 </code></pre>
+<img src="figs/unnamed-chunk-4-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
