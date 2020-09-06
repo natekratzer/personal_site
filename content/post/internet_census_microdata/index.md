@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: cea2bb3a46cca1d8
+rmd_hash: 7273b3dfa1fa07e3
 
 ---
 
@@ -341,6 +341,10 @@ Now let's add standard errors and graph the data.
 
 <div class="highlight">
 
+</div>
+
+<div class="highlight">
+
 <pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># We do need to prep the data a little so that we're not carrying through the whole dataframe.</span>
 <span class='k'>df_in</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='o'>!</span><span class='nf'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='k'>hspd_int</span>)) <span class='o'>%&gt;%</span>
@@ -358,27 +362,14 @@ Now let's add standard errors and graph the data.
             me = <span class='m'>100</span> <span class='o'>*</span> <span class='m'>1.96</span> <span class='o'>*</span> <span class='k'>sd</span>) <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='k'>Race</span> != <span class='s'>"All Others"</span>) <span class='c'># When plotting All Others overlaps White and having five lines makes it quite hard to read. </span>
 
-<span class='c'># At this point I'll introduce a function to plot multiple groups over time, since we'll use this again </span>
 
-<span class='k'>plt_by</span> <span class='o'>&lt;-</span> <span class='nf'>function</span>(<span class='k'>df</span>, <span class='k'>group_var</span>, <span class='k'>title_text</span> = <span class='s'>"High Speed Internet Access by Race and Ethnicity"</span>) {
-  
-  <span class='k'>plt</span> <span class='o'>&lt;-</span> <span class='nf'>ggplot</span>(data = <span class='k'>df</span>, <span class='nf'>aes</span>(x = <span class='k'>Year</span>, y = <span class='k'>Percent</span>, group = {{<span class='k'>group_var</span>}}, colour = {{<span class='k'>group_var</span>}})) <span class='o'>+</span>
-    <span class='nf'>geom_errorbar</span>(<span class='nf'>aes</span>(ymin = <span class='k'>Percent</span> <span class='o'>-</span> <span class='k'>me</span>, ymax = <span class='k'>Percent</span> <span class='o'>+</span> <span class='k'>me</span>), width = <span class='m'>.1</span>) <span class='o'>+</span>
-    <span class='nf'>geom_point</span>() <span class='o'>+</span>
-    <span class='nf'>geom_line</span>() <span class='o'>+</span>
-    <span class='nf'>theme_bw</span>() <span class='o'>+</span>
-    <span class='nf'>labs</span>(title = <span class='k'>title_text</span>, x = <span class='s'>"Year"</span>, y = <span class='s'>"Percent"</span>) <span class='o'>+</span>
-    <span class='nf'>theme</span>(legend.position = <span class='s'>"bottom"</span>)
-
-  <span class='k'>plt</span>
-}
 
 <span class='k'>plt_race</span> <span class='o'>&lt;-</span> <span class='nf'>plt_by</span>(<span class='k'>df_plt</span>, <span class='k'>Race</span>)
 
 <span class='k'>plt_race</span>
 
 </code></pre>
-<img src="figs/unnamed-chunk-15-1.png" width="700px" style="display: block; margin: auto;" />
+<img src="figs/unnamed-chunk-16-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 

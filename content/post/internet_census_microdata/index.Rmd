@@ -371,7 +371,27 @@ df_wide <- df_group  %>%
 While we do see high NA values in some years
 
 
-Now let's add standard errors and graph the data. 
+Now let's add standard errors and graph the data.
+
+
+```{r, echo = FALSE}
+# At this point I'll introduce a function to plot multiple groups over time, since we'll use this again 
+
+plt_by <- function(df, group_var, title_text = "High Speed Internet Access by Race and Ethnicity") {
+  
+  plt <- ggplot(data = df, aes(x = Year, y = Percent, group = {{group_var}}, colour = {{group_var}})) +
+    geom_errorbar(aes(ymin = Percent - me, ymax = Percent + me), width = .1) +
+    geom_point() +
+    geom_line() +
+    theme_bw() +
+    labs(title = title_text, x = "Year", y = "Percent") +
+    theme(legend.position = "bottom")
+
+  plt
+}
+```
+
+
 ```{r}
 # We do need to prep the data a little so that we're not carrying through the whole dataframe.
 df_in <- df %>%
@@ -390,20 +410,7 @@ df_plt <- df_wide %>%
             me = 100 * 1.96 * sd) %>%
   filter(Race != "All Others") # When plotting All Others overlaps White and having five lines makes it quite hard to read. 
 
-# At this point I'll introduce a function to plot multiple groups over time, since we'll use this again 
 
-plt_by <- function(df, group_var, title_text = "High Speed Internet Access by Race and Ethnicity") {
-  
-  plt <- ggplot(data = df, aes(x = Year, y = Percent, group = {{group_var}}, colour = {{group_var}})) +
-    geom_errorbar(aes(ymin = Percent - me, ymax = Percent + me), width = .1) +
-    geom_point() +
-    geom_line() +
-    theme_bw() +
-    labs(title = title_text, x = "Year", y = "Percent") +
-    theme(legend.position = "bottom")
-
-  plt
-}
 
 plt_race <- plt_by(df_plt, Race)
 
