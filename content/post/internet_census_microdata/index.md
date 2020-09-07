@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: e291a0e2d861f275
+rmd_hash: 0687860ac5b924a4
 
 ---
 
@@ -345,6 +345,7 @@ When we split it out this way we can see that the groups without any internet ac
     percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))
   )
 
+
 <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 4: Almost right!"</span>,
@@ -412,6 +413,7 @@ I'll also note that the way the Census Bureau constructs weights is very conveni
          percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
          percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
 
+<span class='c'># Make the table prettier</span>
 <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 5: High Speed Internet in Kentucky"</span>,
@@ -520,6 +522,7 @@ Know that we know the data we'd also like to know how uncertain our sample is so
   sd = <span class='nf'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span>(<span class='k'>sample_summary</span><span class='o'>$</span><span class='k'>group_mean</span>)
 ) 
 
+<span class='c'># Make the table prettier</span>
 <span class='k'>display_tbl</span> <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
@@ -690,9 +693,76 @@ Next we'll build a table by race and year.
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
   <span class='nf'>pivot_wider</span>(id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>race</span>, <span class='k'>YEAR</span>), names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
-         percent_na = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+         percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
+         percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+
+<span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"All Other Races"</span>,
+    rows = <span class='k'>race</span> <span class='o'>==</span> <span class='s'>"All Others"</span>
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"White"</span>,
+    rows = <span class='k'>race</span> <span class='o'>==</span> <span class='s'>"White"</span>
+  ) <span class='o'>%&gt;%</span>
+    <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"Hispanic"</span>,
+    rows = <span class='k'>race</span> <span class='o'>==</span> <span class='s'>"Hispanic"</span>
+  ) <span class='o'>%&gt;%</span>
+    <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"Black"</span>,
+    rows = <span class='k'>race</span> <span class='o'>==</span> <span class='s'>"Black"</span>
+  ) <span class='o'>%&gt;%</span>
+    <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"Asian"</span>,
+    rows = <span class='k'>race</span> <span class='o'>==</span> <span class='s'>"Asian"</span>
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_hide.html'>cols_hide</a></span>(
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>race</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 6: High Speed Internet Access"</span>,
+             subtitle = <span class='s'>"By race and ethnicity"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_number.html'>fmt_number</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>No</span>, <span class='k'>Yes</span>, <span class='k'>`NA`</span>),
+             n_sigfig = <span class='m'>3</span>,
+             suffixing = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>),
+              decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(YEAR = <span class='s'>"Year"</span>,
+             percent_hspd = <span class='s'>"Yes"</span>,
+             percent_no = <span class='s'>"No"</span>,
+             percent_NA = <span class='s'>"NA"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
+            after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Number of People"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Percent"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_align.html'>cols_align</a></span>(align = <span class='s'>"center"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Yes and No percentages are calculated out of those who answered. NA is reported out of all the data to provide context on how much data is missing."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Source: Author's analysis of IPUMS data."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"hspd_int_by_race.png"</span>, zoom = <span class='m'>5</span>)
+
+<span class='c'>#&gt; Warning in min(rows_matched): no non-missing arguments to min; returning Inf</span>
+
+<span class='c'>#&gt; Warning in max(rows_matched): no non-missing arguments to max; returning -Inf</span>
 
 </code></pre>
+<img src="figs/unnamed-chunk-14-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 

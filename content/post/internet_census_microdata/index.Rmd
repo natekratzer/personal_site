@@ -313,6 +313,7 @@ df_wide <- df_group  %>%
     percent_NA = (`NA` / (Yes + No + `NA`))
   )
 
+
 df_wide %>%
   gt() %>%
   tab_header(title = "Table 4: Almost right!",
@@ -375,6 +376,7 @@ df_wide <- df_group  %>%
          percent_no = 1 - percent_hspd,
          percent_NA = (`NA` / (Yes + No + `NA`)))
 
+# Make the table prettier
 df_wide %>%
   gt() %>%
   tab_header(title = "Table 5: High Speed Internet in Kentucky",
@@ -471,6 +473,7 @@ display_tbl <- tibble(
   sd = sd(sample_summary$group_mean)
 ) 
 
+# Make the table prettier
 display_tbl %>%
   gt() %>%
   opt_row_striping(row_striping = TRUE) %>%
@@ -614,7 +617,69 @@ df_group <- df %>%
 df_wide <- df_group  %>%
   pivot_wider(id_cols = c(race, YEAR), names_from = hspd_int, values_from = count) %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_na = (`NA` / (Yes + No + `NA`)))
+         percent_no = 1 - percent_hspd,
+         percent_NA = (`NA` / (Yes + No + `NA`)))
+
+df_wide %>%
+  gt() %>%
+  tab_row_group(
+    group = "All Other Races",
+    rows = race == "All Others"
+  ) %>%
+  tab_row_group(
+    group = "White",
+    rows = race == "White"
+  ) %>%
+    tab_row_group(
+    group = "Hispanic",
+    rows = race == "Hispanic"
+  ) %>%
+    tab_row_group(
+    group = "Black",
+    rows = race == "Black"
+  ) %>%
+    tab_row_group(
+    group = "Asian",
+    rows = race == "Asian"
+  ) %>%
+  cols_hide(
+    columns = vars(race)
+  ) %>%
+  tab_header(title = "Table 6: High Speed Internet Access",
+             subtitle = "By race and ethnicity") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             n_sigfig = 3,
+             suffixing = TRUE) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_no, percent_NA),
+              decimals = 0) %>%
+  cols_label(YEAR = "Year",
+             percent_hspd = "Yes",
+             percent_no = "No",
+             percent_NA = "NA") %>%
+  cols_move(columns = vars(percent_hspd, percent_no, percent_NA, Yes, No, `NA`),
+            after = vars(YEAR)) %>%
+  tab_spanner(
+    label = "Number of People",
+    columns = vars(Yes, No, `NA`)
+  ) %>%
+  tab_spanner(
+    label = "Percent",
+    columns = vars(percent_hspd, percent_no, percent_NA)
+  ) %>%
+  cols_align(align = "center") %>%
+  tab_source_note(
+    source_note = md("Yes and No percentages are calculated out of those who answered. NA is reported out of all the data to provide context on how much data is missing.")
+  ) %>%
+  tab_source_note(
+    source_note = md("Source: Author's analysis of IPUMS data.")
+  ) %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("hspd_int_by_race.png", zoom = 5)
 
 
 ```
