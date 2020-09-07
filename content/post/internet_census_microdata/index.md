@@ -27,9 +27,14 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 87ca6ba56aeaf60f
+rmd_hash: e291a0e2d861f275
 
 ---
+
+Introduction
+============
+
+This post is a start to finish descriptive analysis of high speed internet access in Kentucky. All of the detail of cleaning the data and iterating while exploring the data is included. This makes for a rather lengthy post, but it also makes it relatively unique in including all of those steps. We go through five attempts at making a table of high speed internet before finally getting it right! There's quite a bit of cleaning work and then also a detour into calculating standard errors via bootstrap so we can correctly display uncertainty in our visuals. While the focus is on the census data, all the code is shown and there are some good examples of using dplyr, tidyr, gt, ggplot2, and even some tidy eval.
 
 Getting the Data
 ================
@@ -88,29 +93,14 @@ Now that we have a high speed internet category we can group the data and count 
 
 <span class='c'># Pivot for easier percent calculations</span>
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
-  <span class='nf'>pivot_wider</span>(id_cols = <span class='k'>YEAR</span>, names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
-  <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
-         percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))) 
-</code></pre>
-
-</div>
-
-<div class="highlight">
-
-<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Count numbers with and without high speed internet</span>
-<span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
-  <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
-  <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>))
-
-<span class='c'>#&gt; `summarise()` regrouping output by 'hspd_int' (override with `.groups` argument)</span>
-
-
-<span class='c'># Pivot for easier percent calculations</span>
-<span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
-  <span class='nf'>pivot_wider</span>(id_cols = <span class='k'>YEAR</span>, names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
-  <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
-         percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
-         percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+  <span class='nf'>pivot_wider</span>(id_cols = <span class='k'>YEAR</span>,
+              names_from = <span class='k'>hspd_int</span>,
+              values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(
+    percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
+    percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
+    percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))
+  ) 
 
 <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
@@ -136,13 +126,80 @@ Now that we have a high speed internet category we can group the data and count 
     columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>)
   ) <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_align.html'>cols_align</a></span>(align = <span class='s'>"center"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Yes and No percentages are calculated out of those who answered to represent the results an analyst might get if they ignored NA values. NA is calculated separately based on all the data."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Source: Author's incorrect analysis of IPUMS data. Used as an example of a mistake to avoid."</span>)
+  ) <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
     table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
     table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
   ) <span class='o'>%&gt;%</span>
-  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"table_test.png"</span>, zoom = <span class='m'>5</span>)
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"unweighted_na_data.png"</span>, zoom = <span class='m'>5</span>)
+
+</code></pre>
+<img src="figs/unnamed-chunk-3-1.png" width="700px" style="display: block; margin: auto;" />
+
+</div>
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Count numbers with and without high speed internet</span>
+<span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>), .groups = <span class='s'>"drop"</span>)
+
+<span class='c'># Pivot for easier percent calculations</span>
+<span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
+  <span class='nf'>pivot_wider</span>(id_cols = <span class='k'>YEAR</span>,
+              names_from = <span class='k'>hspd_int</span>,
+              values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(
+    percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
+    percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
+    percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))
+  )
+
+<span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 2: Quick Analysis with Weights"</span>,
+             subtitle = <span class='s'>"These results are still wrong!"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_number.html'>fmt_number</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>No</span>, <span class='k'>Yes</span>, <span class='k'>`NA`</span>),
+             n_sigfig = <span class='m'>3</span>,
+             suffixing = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>),
+              decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(YEAR = <span class='s'>"Year"</span>,
+             percent_hspd = <span class='s'>"Yes"</span>,
+             percent_no = <span class='s'>"No"</span>,
+             percent_NA = <span class='s'>"NA"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
+            after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Number of People"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Percent"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_align.html'>cols_align</a></span>(align = <span class='s'>"center"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Yes and No percentages are calculated out of those who answered to represent the results an analyst might get if they ignored NA values. NA is calculated separately based on all the data."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Source: Author's incorrect analysis of IPUMS data. Used as an example of a mistake to avoid."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"weighted_na_data.png"</span>, zoom = <span class='m'>5</span>)
 
 </code></pre>
 <img src="figs/unnamed-chunk-4-1.png" width="700px" style="display: block; margin: auto;" />
@@ -177,14 +234,80 @@ So let's get to know the data a bit better by adding in internet access. We'll d
 
 <span class='c'># Pivot for easier percent calculations</span>
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
-  <span class='nf'>pivot_wider</span>(id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>, <span class='k'>int</span>), names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
-  <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
-         percent_na = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+  <span class='nf'>pivot_wider</span>(
+    id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>, <span class='k'>int</span>),
+    names_from = <span class='k'>hspd_int</span>,
+    values_from = <span class='k'>count</span>
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(
+    percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
+    percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
+    percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))
+  )
+
+<span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"Internet Access is NA"</span>,
+    rows = <span class='nf'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='k'>int</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"No Internet Access"</span>,
+    rows = <span class='k'>int</span> <span class='o'>==</span> <span class='s'>"No"</span>
+  ) <span class='o'>%&gt;%</span>
+    <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"Has Internet Access"</span>,
+    rows = <span class='k'>int</span> <span class='o'>==</span> <span class='s'>"Yes"</span>
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_hide.html'>cols_hide</a></span>(
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>int</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 3: Exploring Internet Data"</span>,
+             subtitle = <span class='s'>"These results are exploratory. But not wrong!"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_number.html'>fmt_number</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>No</span>, <span class='k'>Yes</span>, <span class='k'>`NA`</span>),
+             n_sigfig = <span class='m'>3</span>,
+             suffixing = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>),
+              decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(YEAR = <span class='s'>"Year"</span>,
+             percent_hspd = <span class='s'>"Yes"</span>,
+             percent_no = <span class='s'>"No"</span>,
+             percent_NA = <span class='s'>"NA"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
+            after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Number of People"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Percent"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_align.html'>cols_align</a></span>(align = <span class='s'>"center"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Yes and No percentages are calculated out of those who answered to represent the results an analyst might get if they ignored NA values. NA is calculated separately based on all the data."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Source: Author's analysis of IPUMS data."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"explore_int_data.png"</span>, zoom = <span class='m'>5</span>)
+
+<span class='c'>#&gt; Warning in min(rows_matched): no non-missing arguments to min; returning Inf</span>
+
+<span class='c'>#&gt; Warning in max(rows_matched): no non-missing arguments to max; returning -Inf</span>
+
 </code></pre>
+<img src="figs/unnamed-chunk-5-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
-So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet.
+When we split it out this way we can see that the groups without any internet access are all NA values. So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet.
 
 <div class="highlight">
 
@@ -211,14 +334,61 @@ So what we were looking at was the percentage of people with internet who have h
 
 <span class='c'># Pivot for easier percent calculations</span>
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
-  <span class='nf'>pivot_wider</span>(id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>), names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
-  <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
-         percent_na = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+  <span class='nf'>pivot_wider</span>(
+    id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>),
+    names_from = <span class='k'>hspd_int</span>,
+    values_from = <span class='k'>count</span>
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(
+    percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
+    percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
+    percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>))
+  )
+
+<span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 4: Almost right!"</span>,
+             subtitle = <span class='s'>"These results are still a little wrong!"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_number.html'>fmt_number</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>No</span>, <span class='k'>Yes</span>, <span class='k'>`NA`</span>),
+             n_sigfig = <span class='m'>3</span>,
+             suffixing = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>),
+              decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(YEAR = <span class='s'>"Year"</span>,
+             percent_hspd = <span class='s'>"Yes"</span>,
+             percent_no = <span class='s'>"No"</span>,
+             percent_NA = <span class='s'>"NA"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
+            after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Number of People"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Percent"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_align.html'>cols_align</a></span>(align = <span class='s'>"center"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Yes and No percentages are calculated out of those who answered to represent the results an analyst might get if they ignored NA values. NA is calculated separately based on all the data."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Source: Author's incorrect analysis of IPUMS data. Used as an example of a mistake to avoid."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"with_gq_data.png"</span>, zoom = <span class='m'>5</span>)
+
 </code></pre>
+<img src="figs/unnamed-chunk-6-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
-These results look much better, although still quite a few NA results.
+These results look much better, although there's still one more thing to do about those NA results.
 
 Group Quarters in the Census
 ----------------------------
@@ -239,8 +409,49 @@ I'll also note that the way the Census Bureau constructs weights is very conveni
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
   <span class='nf'>pivot_wider</span>(id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>), names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
-         percent_na = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+         percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>,
+         percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+
+<span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 5: High Speed Internet in Kentucky"</span>,
+             subtitle = <span class='s'>""</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_number.html'>fmt_number</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>No</span>, <span class='k'>Yes</span>, <span class='k'>`NA`</span>),
+             n_sigfig = <span class='m'>3</span>,
+             suffixing = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>),
+              decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(YEAR = <span class='s'>"Year"</span>,
+             percent_hspd = <span class='s'>"Yes"</span>,
+             percent_no = <span class='s'>"No"</span>,
+             percent_NA = <span class='s'>"NA"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
+            after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Number of People"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Percent"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_align.html'>cols_align</a></span>(align = <span class='s'>"center"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Yes and No percentages are calculated out of those who answered. NA is reported out of all the data to provide context on how much data is missing."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Source: Author's analysis of IPUMS data."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"no_gq_data.png"</span>, zoom = <span class='m'>5</span>)
+
 </code></pre>
+<img src="figs/unnamed-chunk-7-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
@@ -249,7 +460,7 @@ That removed about half of our NA values. It might be nice to know a bit more ab
 Checking against data.census.gov
 --------------------------------
 
-To do a quick check against the way the census bureau itself analyzes the data I looked at data.census.gov for 2018 in Kentucky. An important note is that their data is for households, and so their numeric counts look quite different because I'm counting number of people. They also have a breakdown where cellular is included in broadband, which I do not want, as a cell phone is not really an adequate work or study device. So to get to what I have we need to add "Broadband such as cable, fiber optic or DSL" and "Satellite Internet service", which gets us to 70.8% compared to the 70.5% in this analysis. The difference is small and most likely the result of their analysis being weighted to the household level rather than the person level. (Internet is measured at the household level and the same for every person in the household, but by choosing to weight it at the person level I am a) letting us talk in terms of people, b) giving more weight to larger households, c) making it possible to breakdown internet access by categories that do vary by household, like age).
+To do a quick check against the way the census bureau itself analyzes the data I looked at data.census.gov for 2018 in Kentucky. An important note is that their data is for households, and so their numeric counts look quite different because I'm counting number of people. They also have a breakdown where cellular is included in broadband, which I do not want, as a cell phone is not really an adequate work or study device. So to get to what I have we need to add "Broadband such as cable, fiber optic or DSL" and "Satellite Internet service", which gets us to 70.8% compared to the 70.5% in this analysis. The difference is small and most likely the result of their analysis being weighted to the household level rather than the person level. (Internet is measured at the household level and the same for every person in the household, but by choosing to weight it at the person level I am a) letting us talk in terms of people, b) giving more weight to larger households, c) making it possible to break down internet access by categories that do vary by household, like age).
 
 ![](data_census_gov.png)
 
@@ -308,7 +519,19 @@ Know that we know the data we'd also like to know how uncertain our sample is so
   mean = <span class='nf'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span>(<span class='k'>sample_summary</span><span class='o'>$</span><span class='k'>group_mean</span>),
   sd = <span class='nf'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span>(<span class='k'>sample_summary</span><span class='o'>$</span><span class='k'>group_mean</span>)
 ) 
+
+<span class='k'>display_tbl</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"mean_sd_bootstrap.png"</span>, zoom = <span class='m'>5</span>)
+
 </code></pre>
+<img src="figs/unnamed-chunk-9-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
@@ -347,7 +570,19 @@ Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based o
 
 <span class='k'>hint_tbl</span> <span class='o'>&lt;-</span> <span class='nf'>as_tibble</span>(<span class='k'>hint_tbl</span>)
 <span class='nf'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='k'>hint_tbl</span>) <span class='o'>&lt;-</span> <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='s'>"mean"</span>, <span class='s'>"sd"</span>) <span class='c'>#The names weren't coerced correctly when transforming into a tibble. </span>
+
+<span class='k'>hint_tbl</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"mean_sd_survey.png"</span>, zoom = <span class='m'>5</span>)
+
 </code></pre>
+<img src="figs/unnamed-chunk-11-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
@@ -370,7 +605,9 @@ Writing a bootstrap function
   <span class='nf'><a href='https://rdrr.io/r/base/function.html'>return</a></span>(<span class='k'>df_out</span>)
 }
 
-<span class='c'>#Need to be able to take in grouping variables so that the summaries can be specific to the groups</span>
+<span class='c'># Need to be able to take in grouping variables so that the summaries can be specific to the groups</span>
+<span class='c'># Using the embrace &#123;&#123;&#125;&#125; notation allows use to pass in unquoted variables to the function. </span>
+
 <span class='k'>bootstrap_pums</span> <span class='o'>&lt;-</span> <span class='nf'>function</span>(<span class='k'>df</span>, <span class='k'>num_samples</span>, <span class='k'>group_vars</span>) {
   
   <span class='k'>nlist</span> <span class='o'>&lt;-</span> <span class='nf'><a href='https://rdrr.io/r/base/list.html'>as.list</a></span>(<span class='nf'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='m'>1</span>, <span class='k'>num_samples</span>, by = <span class='m'>1</span>))
@@ -429,7 +666,7 @@ Race, Poverty, Age
 
 ### Race
 
-We'll build a table by race and year. It's a long table, so I've added some color to both the `Percent Yes` column and the `Percent NA` column. For the NA column I'm using red to pick out cases where the NA values were particularly high, because we want to see if there's a pattern there. For the Percent Yes column I'm checking to see where the values are particularly low.
+Next we'll build a table by race and year.
 
 <div class="highlight">
 

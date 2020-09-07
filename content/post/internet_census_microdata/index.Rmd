@@ -29,6 +29,10 @@ image:
 projects: []
 ---
 
+# Introduction
+
+This post is a start to finish descriptive analysis of high speed internet access in Kentucky. All of the detail of cleaning the data and iterating while exploring the data is included. This makes for a rather lengthy post, but it also makes it relatively unique in including all of those steps. We go through five attempts at making a table of high speed internet before finally getting it right! There's quite a bit of cleaning work and then also a detour into calculating standard errors via bootstrap so we can correctly display uncertainty in our visuals. While the focus is on the census data, all the code is shown and there are some good examples of using dplyr, tidyr, gt, ggplot2, and even some tidy eval. 
+
 # Getting the Data
 
 The easiest way to get census microdata is through the Integrated Public Use Microdata Series (IPUMS) hosted by the University of Minnesota. While you can get the data directly from the Census Bureau, IPUMS has made it much easier to compare across multiple years and to select the variables you want. IPUMS also provides a codebook that is easy to refer to and notes any important changes from year to year. 
@@ -76,23 +80,14 @@ df_group <- df %>%
 
 # Pivot for easier percent calculations
 df_wide <- df_group  %>%
-  pivot_wider(id_cols = YEAR, names_from = hspd_int, values_from = count) %>%
-  mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_NA = (`NA` / (Yes + No + `NA`))) 
-```
-
-```{r}
-# Count numbers with and without high speed internet
-df_group <- df %>%
-  group_by(hspd_int, YEAR) %>%
-  summarize(count = sum(PERWT))
-
-# Pivot for easier percent calculations
-df_wide <- df_group  %>%
-  pivot_wider(id_cols = YEAR, names_from = hspd_int, values_from = count) %>%
-  mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_no = 1 - percent_hspd,
-         percent_NA = (`NA` / (Yes + No + `NA`)))
+  pivot_wider(id_cols = YEAR,
+              names_from = hspd_int,
+              values_from = count) %>%
+  mutate(
+    percent_hspd = (Yes / (Yes + No)),
+    percent_no = 1 - percent_hspd,
+    percent_NA = (`NA` / (Yes + No + `NA`))
+  ) 
 
 df_wide %>%
   gt() %>%
@@ -118,13 +113,75 @@ df_wide %>%
     columns = vars(percent_hspd, percent_no, percent_NA)
   ) %>%
   cols_align(align = "center") %>%
+  tab_source_note(
+    source_note = md("Yes and No percentages are calculated out of those who answered to represent the results an analyst might get if they ignored NA values. NA is calculated separately based on all the data.")
+  ) %>%
+  tab_source_note(
+    source_note = md("Source: Author's incorrect analysis of IPUMS data. Used as an example of a mistake to avoid.")
+  ) %>%
   opt_row_striping(row_striping = TRUE) %>%
   opt_table_outline() %>%
   tab_options(
     table.font.size = px(12),
     table.width = pct(50)
   ) %>%
-  gtsave("table_test.png", zoom = 5)
+  gtsave("unweighted_na_data.png", zoom = 5)
+```
+
+```{r}
+# Count numbers with and without high speed internet
+df_group <- df %>%
+  group_by(hspd_int, YEAR) %>%
+  summarize(count = sum(PERWT), .groups = "drop")
+
+# Pivot for easier percent calculations
+df_wide <- df_group  %>%
+  pivot_wider(id_cols = YEAR,
+              names_from = hspd_int,
+              values_from = count) %>%
+  mutate(
+    percent_hspd = (Yes / (Yes + No)),
+    percent_no = 1 - percent_hspd,
+    percent_NA = (`NA` / (Yes + No + `NA`))
+  )
+
+df_wide %>%
+  gt() %>%
+  tab_header(title = "Table 2: Quick Analysis with Weights",
+             subtitle = "These results are still wrong!") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             n_sigfig = 3,
+             suffixing = TRUE) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_no, percent_NA),
+              decimals = 0) %>%
+  cols_label(YEAR = "Year",
+             percent_hspd = "Yes",
+             percent_no = "No",
+             percent_NA = "NA") %>%
+  cols_move(columns = vars(percent_hspd, percent_no, percent_NA, Yes, No, `NA`),
+            after = vars(YEAR)) %>%
+  tab_spanner(
+    label = "Number of People",
+    columns = vars(Yes, No, `NA`)
+  ) %>%
+  tab_spanner(
+    label = "Percent",
+    columns = vars(percent_hspd, percent_no, percent_NA)
+  ) %>%
+  cols_align(align = "center") %>%
+  tab_source_note(
+    source_note = md("Yes and No percentages are calculated out of those who answered to represent the results an analyst might get if they ignored NA values. NA is calculated separately based on all the data.")
+  ) %>%
+  tab_source_note(
+    source_note = md("Source: Author's incorrect analysis of IPUMS data. Used as an example of a mistake to avoid.")
+  ) %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("weighted_na_data.png", zoom = 5)
 ```
 
 This is better. The second problem is harder to spot. There are 3 hints in the data:
@@ -154,12 +211,72 @@ df_group <- df %>%
 
 # Pivot for easier percent calculations
 df_wide <- df_group  %>%
-  pivot_wider(id_cols = c(YEAR, int), names_from = hspd_int, values_from = count) %>%
-  mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_na = (`NA` / (Yes + No + `NA`)))
+  pivot_wider(
+    id_cols = c(YEAR, int),
+    names_from = hspd_int,
+    values_from = count
+  ) %>%
+  mutate(
+    percent_hspd = (Yes / (Yes + No)),
+    percent_no = 1 - percent_hspd,
+    percent_NA = (`NA` / (Yes + No + `NA`))
+  )
+
+df_wide %>%
+  gt() %>%
+  tab_row_group(
+    group = "Internet Access is NA",
+    rows = is.na(int)
+  ) %>%
+  tab_row_group(
+    group = "No Internet Access",
+    rows = int == "No"
+  ) %>%
+    tab_row_group(
+    group = "Has Internet Access",
+    rows = int == "Yes"
+  ) %>%
+  cols_hide(
+    columns = vars(int)
+  ) %>%
+  tab_header(title = "Table 3: Exploring Internet Data",
+             subtitle = "These results are exploratory. But not wrong!") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             n_sigfig = 3,
+             suffixing = TRUE) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_no, percent_NA),
+              decimals = 0) %>%
+  cols_label(YEAR = "Year",
+             percent_hspd = "Yes",
+             percent_no = "No",
+             percent_NA = "NA") %>%
+  cols_move(columns = vars(percent_hspd, percent_no, percent_NA, Yes, No, `NA`),
+            after = vars(YEAR)) %>%
+  tab_spanner(
+    label = "Number of People",
+    columns = vars(Yes, No, `NA`)
+  ) %>%
+  tab_spanner(
+    label = "Percent",
+    columns = vars(percent_hspd, percent_no, percent_NA)
+  ) %>%
+  cols_align(align = "center") %>%
+  tab_source_note(
+    source_note = md("Yes and No percentages are calculated out of those who answered to represent the results an analyst might get if they ignored NA values. NA is calculated separately based on all the data.")
+  ) %>%
+  tab_source_note(
+    source_note = md("Source: Author's analysis of IPUMS data.")
+  ) %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("explore_int_data.png", zoom = 5)
 ```
 
-So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet. 
+When we split it out this way we can see that the groups without any internet access are all NA values. So what we were looking at was the percentage of people with internet who have high speed internet. What we want is the percentage of all people who have high speed internet. We can fix the way we create our categories by saying that anyone who has no internet also has no high speed internet. 
 
 ```{r}
 df <- df %>%
@@ -185,13 +302,58 @@ df_group <- df %>%
 
 # Pivot for easier percent calculations
 df_wide <- df_group  %>%
-  pivot_wider(id_cols = c(YEAR), names_from = hspd_int, values_from = count) %>%
-  mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_na = (`NA` / (Yes + No + `NA`)))
+  pivot_wider(
+    id_cols = c(YEAR),
+    names_from = hspd_int,
+    values_from = count
+  ) %>%
+  mutate(
+    percent_hspd = (Yes / (Yes + No)),
+    percent_no = 1 - percent_hspd,
+    percent_NA = (`NA` / (Yes + No + `NA`))
+  )
+
+df_wide %>%
+  gt() %>%
+  tab_header(title = "Table 4: Almost right!",
+             subtitle = "These results are still a little wrong!") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             n_sigfig = 3,
+             suffixing = TRUE) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_no, percent_NA),
+              decimals = 0) %>%
+  cols_label(YEAR = "Year",
+             percent_hspd = "Yes",
+             percent_no = "No",
+             percent_NA = "NA") %>%
+  cols_move(columns = vars(percent_hspd, percent_no, percent_NA, Yes, No, `NA`),
+            after = vars(YEAR)) %>%
+  tab_spanner(
+    label = "Number of People",
+    columns = vars(Yes, No, `NA`)
+  ) %>%
+  tab_spanner(
+    label = "Percent",
+    columns = vars(percent_hspd, percent_no, percent_NA)
+  ) %>%
+  cols_align(align = "center") %>%
+  tab_source_note(
+    source_note = md("Yes and No percentages are calculated out of those who answered to represent the results an analyst might get if they ignored NA values. NA is calculated separately based on all the data.")
+  ) %>%
+  tab_source_note(
+    source_note = md("Source: Author's incorrect analysis of IPUMS data. Used as an example of a mistake to avoid.")
+  ) %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("with_gq_data.png", zoom = 5)
 
 ```
 
-These results look much better, although still quite a few NA results. 
+These results look much better, although there's still one more thing to do about those NA results. 
 
 ## Group Quarters in the Census
 
@@ -210,15 +372,53 @@ df_group <- df %>%
 df_wide <- df_group  %>%
   pivot_wider(id_cols = c(YEAR), names_from = hspd_int, values_from = count) %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_na = (`NA` / (Yes + No + `NA`)))
+         percent_no = 1 - percent_hspd,
+         percent_NA = (`NA` / (Yes + No + `NA`)))
 
+df_wide %>%
+  gt() %>%
+  tab_header(title = "Table 5: High Speed Internet in Kentucky",
+             subtitle = "") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             n_sigfig = 3,
+             suffixing = TRUE) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_no, percent_NA),
+              decimals = 0) %>%
+  cols_label(YEAR = "Year",
+             percent_hspd = "Yes",
+             percent_no = "No",
+             percent_NA = "NA") %>%
+  cols_move(columns = vars(percent_hspd, percent_no, percent_NA, Yes, No, `NA`),
+            after = vars(YEAR)) %>%
+  tab_spanner(
+    label = "Number of People",
+    columns = vars(Yes, No, `NA`)
+  ) %>%
+  tab_spanner(
+    label = "Percent",
+    columns = vars(percent_hspd, percent_no, percent_NA)
+  ) %>%
+  cols_align(align = "center") %>%
+  tab_source_note(
+    source_note = md("Yes and No percentages are calculated out of those who answered. NA is reported out of all the data to provide context on how much data is missing.")
+  ) %>%
+  tab_source_note(
+    source_note = md("Source: Author's analysis of IPUMS data.")
+  ) %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("no_gq_data.png", zoom = 5)
 ```
 
 That removed about half of our NA values. It might be nice to know a bit more about the missing data, but at around 3 percent of observations it's unlikely to change our substantive conclusions. I suspect these are cases where there wasn't an answer for that question. We'll keep an eye on NA values as we do the analysis, because as we get into questions like how internet access varies by race, income, age, and education we'll want to know if NA answers are more or less likely in any of those categories. 
 
 ## Checking against data.census.gov
 
-To do a quick check against the way the census bureau itself analyzes the data I looked at data.census.gov for 2018 in Kentucky. An important note is that their data is for households, and so their numeric counts look quite different because I'm counting number of people. They also have a breakdown where cellular is included in broadband, which I do not want, as a cell phone is not really an adequate work or study device. So to get to what I have we need to add "Broadband such as cable, fiber optic or DSL" and "Satellite Internet service", which gets us to 70.8% compared to the 70.5% in this analysis. The difference is small and most likely the result of their analysis being weighted to the household level rather than the person level. (Internet is measured at the household level and the same for every person in the household, but by choosing to weight it at the person level I am a) letting us talk in terms of people, b) giving more weight to larger households, c) making it possible to breakdown internet access by categories that do vary by household, like age). 
+To do a quick check against the way the census bureau itself analyzes the data I looked at data.census.gov for 2018 in Kentucky. An important note is that their data is for households, and so their numeric counts look quite different because I'm counting number of people. They also have a breakdown where cellular is included in broadband, which I do not want, as a cell phone is not really an adequate work or study device. So to get to what I have we need to add "Broadband such as cable, fiber optic or DSL" and "Satellite Internet service", which gets us to 70.8% compared to the 70.5% in this analysis. The difference is small and most likely the result of their analysis being weighted to the household level rather than the person level. (Internet is measured at the household level and the same for every person in the household, but by choosing to weight it at the person level I am a) letting us talk in terms of people, b) giving more weight to larger households, c) making it possible to break down internet access by categories that do vary by household, like age). 
 
 ![](data_census_gov.png)
 
@@ -271,6 +471,15 @@ display_tbl <- tibble(
   sd = sd(sample_summary$group_mean)
 ) 
 
+display_tbl %>%
+  gt() %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("mean_sd_bootstrap.png", zoom = 5)
 ```
 
 We can also take a look at our bootstrap graphically. We want to check that the distribution of the sample is roughly normal. If it's not, that means we didn't do enough bootstrap samples for the Central Limit Theorem to kick in. 
@@ -301,10 +510,19 @@ hint_tbl <- svymean(~hspd_num, design = svy_df)
 
 hint_tbl <- as_tibble(hint_tbl)
 names(hint_tbl) <- c("mean", "sd") #The names weren't coerced correctly when transforming into a tibble. 
+
+hint_tbl %>%
+  gt() %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("mean_sd_survey.png", zoom = 5)
 ```
 
 These results are very similar. Following the IPUMS recommendation we'll continue on with the bootstrap, but it's good to know the results are the same for practical purposes. So now instead of just doing 2018, we'll need to do every year. We've already one the mean values for every year, and they're still saved in the `df_wide` variable right now. So let's write a function for bootstrap that will let us find standard errors for every year or for any other grouping we choose. 
-
 
 ## Writing a bootstrap function
 ```{r}
@@ -320,7 +538,9 @@ create_samples <- function(sample_id, df){
   return(df_out)
 }
 
-#Need to be able to take in grouping variables so that the summaries can be specific to the groups
+# Need to be able to take in grouping variables so that the summaries can be specific to the groups
+# Using the embrace {{}} notation allows use to pass in unquoted variables to the function. 
+
 bootstrap_pums <- function(df, num_samples, group_vars) {
   
   nlist <- as.list(seq(1, num_samples, by = 1))
@@ -367,12 +587,11 @@ plt_int <- ggplot(df_plt, aes(x = Year, y = Percent)) +
 plt_int
 ```
 
-
 ## Race, Poverty, Age
 
 ### Race
 
-We'll build a table by race and year. It's a long table, so I've added some color to both the `Percent Yes` column and the `Percent NA` column. For the NA column I'm using red to pick out cases where the NA values were particularly high, because we want to see if there's a pattern there. For the Percent Yes column I'm checking to see where the values are particularly low.
+Next we'll build a table by race and year.
 
 ```{r}
 # Let's build a table first and then we'll do the standard errors
