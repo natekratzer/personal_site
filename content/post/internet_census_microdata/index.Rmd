@@ -288,12 +288,9 @@ plt
 
 ## Checking our results against the survey package
 
-Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap). For some reason hugodown has problems with this chunk of code, so I've had to pull it in as an image, which is why it's not formatted quite the same way.
+Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap). 
 
-![](survey_code_chunk.png)
-```{r, echo = FALSE}
-library(survey)
-
+```{r}
 # Here we're assuming a simple design. 
 # Survey requires the creation of a design object and then has functions that work with that object.
 # You can get more complicated, which is when the survey package would be most useful.

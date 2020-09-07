@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 4d1a5518807e3f7b
+rmd_hash: 87ca6ba56aeaf60f
 
 ---
 
@@ -333,11 +333,21 @@ We can also take a look at our bootstrap graphically. We want to check that the 
 Checking our results against the survey package
 -----------------------------------------------
 
-Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap). For some reason hugodown has problems with this chunk of code, so I've had to pull it in as an image, which is why it's not formatted quite the same way.
-
-![](survey_code_chunk.png)
+Above we found a mean of 0.705 for 2018 and and standard error of 0.0029 based on our bootstrap analysis. It's worth checking that this is the same result we'd get using an analytic approach (instead of bootstrap).
 
 <div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Here we're assuming a simple design. </span>
+<span class='c'># Survey requires the creation of a design object and then has functions that work with that object.</span>
+<span class='c'># You can get more complicated, which is when the survey package would be most useful.</span>
+<span class='k'>svy_df</span> <span class='o'>&lt;-</span> <span class='nf'><a href='https://rdrr.io/pkg/survey/man/svydesign.html'>svydesign</a></span>(ids = <span class='o'>~</span> <span class='m'>1</span>, weights = <span class='o'>~</span><span class='k'>PERWT</span>, data = <span class='k'>df2018</span>)
+
+<span class='c'># Taking the mean and standard error from our design object</span>
+<span class='k'>hint_tbl</span> <span class='o'>&lt;-</span> <span class='nf'><a href='https://rdrr.io/pkg/survey/man/surveysummary.html'>svymean</a></span>(<span class='o'>~</span><span class='k'>hspd_num</span>, design = <span class='k'>svy_df</span>)
+
+<span class='k'>hint_tbl</span> <span class='o'>&lt;-</span> <span class='nf'>as_tibble</span>(<span class='k'>hint_tbl</span>)
+<span class='nf'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='k'>hint_tbl</span>) <span class='o'>&lt;-</span> <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='s'>"mean"</span>, <span class='s'>"sd"</span>) <span class='c'>#The names weren't coerced correctly when transforming into a tibble. </span>
+</code></pre>
 
 </div>
 
