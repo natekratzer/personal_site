@@ -29,24 +29,18 @@ image:
 projects: []
 ---
 
-```{r, echo = FALSE}
-library(tidyverse)
 
-df <- tibble(
-  x = 1:4,
-  y = c("a", "a", "b", "b")
+```{r, eval = FALSE}
+# Here we're assuming a simple design. 
+# Survey requires the creation of a design object and then has functions that work with that object.
+# You can get more complicated, which is when the survey package would be most useful.
+svy_df <- svydesign(ids = ~ 1, weights = ~PERWT, data = df2018)
 
-)
+# Taking the mean and standard error from our design object
+hint_tbl <- svymean(~hspd_num, design = svy_df)
 
-make_groups <- function(df, group_var){
-  df <- df %>%
-    group_by({{group_var}}) %>%
-    summarize(mean = mean(x))
-}
-
-df <- df %>%
-  make_groups(y)
-
-print(df)
+hint_tbl <- as_tibble(hint_tbl)
+names(hint_tbl) <- c("mean", "sd") #The names weren't coerced correctly when transforming into a tibble. 
 ```
+
 
