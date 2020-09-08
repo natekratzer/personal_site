@@ -31,7 +31,7 @@ projects: []
 
 # Introduction
 
-This post is a start to finish descriptive analysis of high speed internet access in Kentucky. All of the detail of cleaning the data and iterating while exploring the data is included. This makes for a rather lengthy post, but it also makes it relatively unique in including all of those steps. We go through five attempts at making a table of high speed internet before finally getting it right! There's quite a bit of cleaning work and then also a detour into calculating standard errors via bootstrap so we can correctly display uncertainty in our visuals. While the focus is on the census data, all the code is shown and there are some good examples of using dplyr, tidyr, gt, ggplot2, and even some tidy eval. 
+This post is a start to finish descriptive analysis of high speed internet access in Kentucky. All of the detail of cleaning the data and iterating while exploring the data is included. This makes for a rather lengthy post, but it also makes it relatively unique in including all of those steps. We go through five attempts at making a table of high speed internet before finally getting it right! There's quite a bit of cleaning work and then also a detour into calculating standard errors via bootstrap so we can correctly display uncertainty in our visuals. While the focus is on the census data, I do show the code used for analysis. I did decide to hide the code used to make all the tables (it gets rather lengthy), but you can see that code [on Github](https://github.com/natekratzer/personal_site/blob/more_posts/content/post/internet_census_microdata/index.Rmd) if interested. 
 
 # Getting the Data
 
@@ -88,7 +88,9 @@ df_wide <- df_group  %>%
     percent_no = 1 - percent_hspd,
     percent_NA = (`NA` / (Yes + No + `NA`))
   ) 
+```
 
+```{r, echo = FALSE}
 df_wide %>%
   gt() %>%
   tab_header(title = "Table 1: Quick Analysis",
@@ -145,6 +147,9 @@ df_wide <- df_group  %>%
     percent_NA = (`NA` / (Yes + No + `NA`))
   )
 
+```
+
+```{r, echo = FALSE}
 df_wide %>%
   gt() %>%
   tab_header(title = "Table 2: Quick Analysis with Weights",
@@ -222,6 +227,9 @@ df_wide <- df_group  %>%
     percent_NA = (`NA` / (Yes + No + `NA`))
   )
 
+```
+
+```{r, echo = FALSE}
 df_wide %>%
   gt() %>%
   tab_row_group(
@@ -312,8 +320,9 @@ df_wide <- df_group  %>%
     percent_no = 1 - percent_hspd,
     percent_NA = (`NA` / (Yes + No + `NA`))
   )
+```
 
-
+```{r, echo = FALSE}
 df_wide %>%
   gt() %>%
   tab_header(title = "Table 4: Almost right!",
@@ -351,7 +360,6 @@ df_wide %>%
     table.width = pct(50)
   ) %>%
   gtsave("with_gq_data.png", zoom = 5)
-
 ```
 
 These results look much better, although there's still one more thing to do about those NA results. 
@@ -375,7 +383,9 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_no = 1 - percent_hspd,
          percent_NA = (`NA` / (Yes + No + `NA`)))
+```
 
+```{r, echo = FALSE}
 # Make the table prettier
 df_wide %>%
   gt() %>%
@@ -472,6 +482,9 @@ display_tbl <- tibble(
   mean = mean(sample_summary$group_mean),
   sd = sd(sample_summary$group_mean)
 ) 
+```
+
+```{r, echo = FALSE}
 
 # Make the table prettier
 display_tbl %>%
@@ -513,7 +526,9 @@ hint_tbl <- svymean(~hspd_num, design = svy_df)
 
 hint_tbl <- as_tibble(hint_tbl)
 names(hint_tbl) <- c("mean", "sd") #The names weren't coerced correctly when transforming into a tibble. 
+```
 
+```{r, echo = FALSE}
 hint_tbl %>%
   gt() %>%
   opt_row_striping(row_striping = TRUE) %>%
@@ -619,7 +634,9 @@ df_wide <- df_group  %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
          percent_no = 1 - percent_hspd,
          percent_NA = (`NA` / (Yes + No + `NA`)))
+```
 
+```{r, echo = FALSE}
 df_wide %>%
   gt() %>%
   tab_row_group(
@@ -680,8 +697,6 @@ df_wide %>%
     table.width = pct(50)
   ) %>%
   gtsave("hspd_int_by_race.png", zoom = 5)
-
-
 ```
 
 While we do see high NA values in some years
@@ -689,8 +704,7 @@ While we do see high NA values in some years
 
 Now let's add standard errors and graph the data.
 
-
-```{r, echo = FALSE}
+```{r}
 # At this point I'll introduce a function to plot multiple groups over time, since we'll use this again 
 
 plt_by <- function(df, group_var, title_text = "High Speed Internet Access by Race and Ethnicity") {
