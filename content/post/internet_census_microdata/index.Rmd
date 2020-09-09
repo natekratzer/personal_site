@@ -11,7 +11,7 @@ categories: []
 date: 2020-08-29
 lastmod: 2020-08-29
 featured: false
-draft: false
+draft: true
 
 # Featured image
 # To use, add an image named `featured.jpg/png` to your page's folder.
@@ -699,29 +699,9 @@ df_wide %>%
   gtsave("hspd_int_by_race.png", zoom = 5)
 ```
 
-While we do see high NA values in some years
+While we do see high NA values in some years, overall they're at reasonable levels and seem to be lowest in 2018. This table is quite long though. While that works for exploring the data, for an actual display we'd probably want to focus on just 2018 and show the history in the graph below. 
 
-
-Now let's add standard errors and graph the data.
-
-```{r}
-# At this point I'll introduce a function to plot multiple groups over time, since we'll use this again 
-
-plt_by <- function(df, group_var, title_text = "High Speed Internet Access by Race and Ethnicity") {
-  
-  plt <- ggplot(data = df, aes(x = Year, y = Percent, group = {{group_var}}, colour = {{group_var}})) +
-    geom_errorbar(aes(ymin = Percent - me, ymax = Percent + me), width = .1) +
-    geom_point() +
-    geom_line() +
-    theme_bw() +
-    labs(title = title_text, x = "Year", y = "Percent") +
-    theme(legend.position = "bottom")
-
-  plt
-}
-```
-
-
+Now let's add standard errors and graph the data. I'll write the code for graphing the data as a function since we will use it again. 
 ```{r}
 # We do need to prep the data a little so that we're not carrying through the whole dataframe.
 df_in <- df %>%
@@ -740,7 +720,19 @@ df_plt <- df_wide %>%
             me = 100 * 1.96 * sd) %>%
   filter(Race != "All Others") # When plotting All Others overlaps White and having five lines makes it quite hard to read. 
 
+# At this point I'll introduce a function to plot multiple groups over time, since we'll use this again 
+plt_by <- function(df, group_var, title_text = "High Speed Internet Access by Race and Ethnicity") {
+  
+  plt <- ggplot(data = df, aes(x = Year, y = Percent, group = {{group_var}}, colour = {{group_var}})) +
+    geom_errorbar(aes(ymin = Percent - me, ymax = Percent + me), width = .1) +
+    geom_point() +
+    geom_line() +
+    theme_bw() +
+    labs(title = title_text, x = "Year", y = "Percent") +
+    theme(legend.position = "bottom")
 
+  plt
+}
 
 plt_race <- plt_by(df_plt, Race)
 
@@ -766,8 +758,64 @@ df_group <- df %>%
 df_wide <- df_group  %>%
   pivot_wider(id_cols = c(poverty, YEAR), names_from = hspd_int, values_from = count) %>%
   mutate(percent_hspd = (Yes / (Yes + No)),
-         percent_na = (`NA` / (Yes + No + `NA`)))
+         percent_no = 1 - percent_hspd, 
+         percent_NA = (`NA` / (Yes + No + `NA`)))
+```
 
+
+```{r}
+df_wide %>%
+  gt() %>%
+  tab_row_group(
+    group = "Not in Poverty",
+    rows = poverty == "Not in Poverty"
+  ) %>%
+  tab_row_group(
+    group = "Near Poverty",
+    rows = poverty == "Near Poverty"
+  ) %>%
+    tab_row_group(
+    group = "In Poverty",
+    rows = poverty == "In Poverty"
+  ) %>%
+  cols_hide(
+    columns = vars(poverty)
+  ) %>%
+  tab_header(title = "Table 6: High Speed Internet Access",
+             subtitle = "By race and ethnicity") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             n_sigfig = 3,
+             suffixing = TRUE) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_no, percent_NA),
+              decimals = 0) %>%
+  cols_label(YEAR = "Year",
+             percent_hspd = "Yes",
+             percent_no = "No",
+             percent_NA = "NA") %>%
+  cols_move(columns = vars(percent_hspd, percent_no, percent_NA, Yes, No, `NA`),
+            after = vars(YEAR)) %>%
+  tab_spanner(
+    label = "Number of People",
+    columns = vars(Yes, No, `NA`)
+  ) %>%
+  tab_spanner(
+    label = "Percent",
+    columns = vars(percent_hspd, percent_no, percent_NA)
+  ) %>%
+  cols_align(align = "center") %>%
+  tab_source_note(
+    source_note = md("Yes and No percentages are calculated out of those who answered. NA is reported out of all the data to provide context on how much data is missing.")
+  ) %>%
+  tab_source_note(
+    source_note = md("Source: Author's analysis of IPUMS data.")
+  ) %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("hspd_int_by_poverty.png", zoom = 5)
 ```
 
 

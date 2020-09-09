@@ -11,7 +11,7 @@ categories: []
 date: 2020-08-29
 lastmod: 2020-08-29
 featured: false
-draft: false
+draft: true
 
 # Featured image
 # To use, add an image named `featured.jpg/png` to your page's folder.
@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: d336716944f3ee3b
+rmd_hash: b3b80886fd729412
 
 ---
 
@@ -511,29 +511,9 @@ Next we'll build a table by race and year.
 
 </div>
 
-While we do see high NA values in some years
+While we do see high NA values in some years, overall they're at reasonable levels and seem to be lowest in 2018. This table is quite long though. While that works for exploring the data, for an actual display we'd probably want to focus on just 2018 and show the history in the graph below.
 
-Now let's add standard errors and graph the data.
-
-<div class="highlight">
-
-<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># At this point I'll introduce a function to plot multiple groups over time, since we'll use this again </span>
-
-<span class='k'>plt_by</span> <span class='o'>&lt;-</span> <span class='nf'>function</span>(<span class='k'>df</span>, <span class='k'>group_var</span>, <span class='k'>title_text</span> = <span class='s'>"High Speed Internet Access by Race and Ethnicity"</span>) {
-  
-  <span class='k'>plt</span> <span class='o'>&lt;-</span> <span class='nf'>ggplot</span>(data = <span class='k'>df</span>, <span class='nf'>aes</span>(x = <span class='k'>Year</span>, y = <span class='k'>Percent</span>, group = &#123;&#123;<span class='k'>group_var</span>&#125;&#125;, colour = &#123;&#123;<span class='k'>group_var</span>&#125;&#125;)) <span class='o'>+</span>
-    <span class='nf'>geom_errorbar</span>(<span class='nf'>aes</span>(ymin = <span class='k'>Percent</span> <span class='o'>-</span> <span class='k'>me</span>, ymax = <span class='k'>Percent</span> <span class='o'>+</span> <span class='k'>me</span>), width = <span class='m'>.1</span>) <span class='o'>+</span>
-    <span class='nf'>geom_point</span>() <span class='o'>+</span>
-    <span class='nf'>geom_line</span>() <span class='o'>+</span>
-    <span class='nf'>theme_bw</span>() <span class='o'>+</span>
-    <span class='nf'>labs</span>(title = <span class='k'>title_text</span>, x = <span class='s'>"Year"</span>, y = <span class='s'>"Percent"</span>) <span class='o'>+</span>
-    <span class='nf'>theme</span>(legend.position = <span class='s'>"bottom"</span>)
-
-  <span class='k'>plt</span>
-}
-</code></pre>
-
-</div>
+Now let's add standard errors and graph the data. I'll write the code for graphing the data as a function since we will use it again.
 
 <div class="highlight">
 
@@ -554,14 +534,26 @@ Now let's add standard errors and graph the data.
             me = <span class='m'>100</span> <span class='o'>*</span> <span class='m'>1.96</span> <span class='o'>*</span> <span class='k'>sd</span>) <span class='o'>%&gt;%</span>
   <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='k'>Race</span> != <span class='s'>"All Others"</span>) <span class='c'># When plotting All Others overlaps White and having five lines makes it quite hard to read. </span>
 
+<span class='c'># At this point I'll introduce a function to plot multiple groups over time, since we'll use this again </span>
+<span class='k'>plt_by</span> <span class='o'>&lt;-</span> <span class='nf'>function</span>(<span class='k'>df</span>, <span class='k'>group_var</span>, <span class='k'>title_text</span> = <span class='s'>"High Speed Internet Access by Race and Ethnicity"</span>) {
+  
+  <span class='k'>plt</span> <span class='o'>&lt;-</span> <span class='nf'>ggplot</span>(data = <span class='k'>df</span>, <span class='nf'>aes</span>(x = <span class='k'>Year</span>, y = <span class='k'>Percent</span>, group = &#123;&#123;<span class='k'>group_var</span>&#125;&#125;, colour = &#123;&#123;<span class='k'>group_var</span>&#125;&#125;)) <span class='o'>+</span>
+    <span class='nf'>geom_errorbar</span>(<span class='nf'>aes</span>(ymin = <span class='k'>Percent</span> <span class='o'>-</span> <span class='k'>me</span>, ymax = <span class='k'>Percent</span> <span class='o'>+</span> <span class='k'>me</span>), width = <span class='m'>.1</span>) <span class='o'>+</span>
+    <span class='nf'>geom_point</span>() <span class='o'>+</span>
+    <span class='nf'>geom_line</span>() <span class='o'>+</span>
+    <span class='nf'>theme_bw</span>() <span class='o'>+</span>
+    <span class='nf'>labs</span>(title = <span class='k'>title_text</span>, x = <span class='s'>"Year"</span>, y = <span class='s'>"Percent"</span>) <span class='o'>+</span>
+    <span class='nf'>theme</span>(legend.position = <span class='s'>"bottom"</span>)
 
+  <span class='k'>plt</span>
+}
 
 <span class='k'>plt_race</span> <span class='o'>&lt;-</span> <span class='nf'>plt_by</span>(<span class='k'>df_plt</span>, <span class='k'>Race</span>)
 
 <span class='k'>plt_race</span>
 
 </code></pre>
-<img src="figs/unnamed-chunk-24-1.png" width="700px" style="display: block; margin: auto;" />
+<img src="figs/unnamed-chunk-23-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
@@ -586,8 +578,73 @@ Poverty Status
 <span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
   <span class='nf'>pivot_wider</span>(id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>poverty</span>, <span class='k'>YEAR</span>), names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
   <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
-         percent_na = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+         percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>, 
+         percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
 </code></pre>
+
+</div>
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gt.html'>gt</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"Not in Poverty"</span>,
+    rows = <span class='k'>poverty</span> <span class='o'>==</span> <span class='s'>"Not in Poverty"</span>
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"Near Poverty"</span>,
+    rows = <span class='k'>poverty</span> <span class='o'>==</span> <span class='s'>"Near Poverty"</span>
+  ) <span class='o'>%&gt;%</span>
+    <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_row_group.html'>tab_row_group</a></span>(
+    group = <span class='s'>"In Poverty"</span>,
+    rows = <span class='k'>poverty</span> <span class='o'>==</span> <span class='s'>"In Poverty"</span>
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_hide.html'>cols_hide</a></span>(
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>poverty</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_header.html'>tab_header</a></span>(title = <span class='s'>"Table 6: High Speed Internet Access"</span>,
+             subtitle = <span class='s'>"By race and ethnicity"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_number.html'>fmt_number</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>No</span>, <span class='k'>Yes</span>, <span class='k'>`NA`</span>),
+             n_sigfig = <span class='m'>3</span>,
+             suffixing = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/fmt_percent.html'>fmt_percent</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>),
+              decimals = <span class='m'>0</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_label.html'>cols_label</a></span>(YEAR = <span class='s'>"Year"</span>,
+             percent_hspd = <span class='s'>"Yes"</span>,
+             percent_no = <span class='s'>"No"</span>,
+             percent_NA = <span class='s'>"NA"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_move.html'>cols_move</a></span>(columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>, <span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>),
+            after = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>YEAR</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Number of People"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>Yes</span>, <span class='k'>No</span>, <span class='k'>`NA`</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_spanner.html'>tab_spanner</a></span>(
+    label = <span class='s'>"Percent"</span>,
+    columns = <span class='nf'><a href='https://dplyr.tidyverse.org/reference/vars.html'>vars</a></span>(<span class='k'>percent_hspd</span>, <span class='k'>percent_no</span>, <span class='k'>percent_NA</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/cols_align.html'>cols_align</a></span>(align = <span class='s'>"center"</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Yes and No percentages are calculated out of those who answered. NA is reported out of all the data to provide context on how much data is missing."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_source_note.html'>tab_source_note</a></span>(
+    source_note = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/md.html'>md</a></span>(<span class='s'>"Source: Author's analysis of IPUMS data."</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_row_striping.html'>opt_row_striping</a></span>(row_striping = <span class='kc'>TRUE</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/opt_table_outline.html'>opt_table_outline</a></span>() <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/tab_options.html'>tab_options</a></span>(
+    table.font.size = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/px.html'>px</a></span>(<span class='m'>12</span>),
+    table.width = <span class='nf'><a href='https://rdrr.io/pkg/gt/man/pct.html'>pct</a></span>(<span class='m'>50</span>)
+  ) <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/pkg/gt/man/gtsave.html'>gtsave</a></span>(<span class='s'>"hspd_int_by_poverty.png"</span>, zoom = <span class='m'>5</span>)
+
+<span class='c'>#&gt; Warning in min(rows_matched): no non-missing arguments to min; returning Inf</span>
+
+<span class='c'>#&gt; Warning in max(rows_matched): no non-missing arguments to max; returning -Inf</span>
+
+</code></pre>
+<img src="figs/unnamed-chunk-25-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
 
