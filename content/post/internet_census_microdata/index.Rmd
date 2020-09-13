@@ -1150,7 +1150,7 @@ ggplot(ky_sf) +
         axis.ticks = element_blank(),
         axis.title = element_blank(),
         panel.border = element_blank()) +
-  labs(title = "Children ages 5-18 Households without High Speed Internet Access",
+  labs(title = "Children ages 5-18 in Households without High Speed Internet Access",
        caption = "Map is shaded by percent of children without high speed access in each Public Use Microdata Area")
 ```
 
