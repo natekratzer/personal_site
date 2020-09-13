@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 64e39f2353b2fa6d
+rmd_hash: 4f711cc8baf59e14
 
 ---
 
@@ -715,7 +715,7 @@ As I've mentioned, a nice feature of using microdata is that you can look at the
         axis.ticks = <span class='nf'>element_blank</span>(),
         axis.title = <span class='nf'>element_blank</span>(),
         panel.border = <span class='nf'>element_blank</span>()) <span class='o'>+</span>
-  <span class='nf'>labs</span>(title = <span class='s'>"Children ages 5-18 Households without High Speed Internet Access"</span>,
+  <span class='nf'>labs</span>(title = <span class='s'>"Children ages 5-18 in Households without High Speed Internet Access"</span>,
        caption = <span class='s'>"Map is shaded by percent of children without high speed access in each Public Use Microdata Area"</span>)
 
 </code></pre>
