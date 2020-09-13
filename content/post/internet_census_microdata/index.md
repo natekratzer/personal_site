@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 6c95391153ee7184
+rmd_hash: 198fc196032e3479
 
 ---
 
@@ -566,9 +566,11 @@ Now let's add standard errors and graph the data. I'll write the code for graphi
 Poverty Status
 --------------
 
+I'm going to skip showing the code for Poverty, Age, and Geography because it's extremely similar to the code used for Race. The poverty variable in the IPUMS data is measured in income as a percent of the poverty line. So for this analysis I code under 100 as being in poverty, between 100 and 200 percent of the poverty line as near poverty, and above 200 percent as not being in poverty.
+
 <div class="highlight">
 
-<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Coding a race variable using case_when</span>
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Coding a poverty variable using case_when</span>
 <span class='k'>df</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
   <span class='nf'>mutate</span>(poverty = <span class='nf'>case_when</span>(
             <span class='k'>POVERTY</span> <span class='o'>&lt;=</span> <span class='m'>100</span> <span class='o'>~</span> <span class='s'>"In Poverty"</span>,
@@ -598,27 +600,6 @@ Poverty Status
 
 <div class="highlight">
 
-<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># We do need to prep the data a little so that we're not carrying through the whole dataframe.</span>
-<span class='k'>df_in</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
-  <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='o'>!</span><span class='nf'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='k'>hspd_int</span>)) <span class='o'>%&gt;%</span>
-  <span class='nf'>mutate</span>(hspd_n = <span class='nf'>if_else</span>(<span class='k'>hspd_int</span> <span class='o'>==</span> <span class='s'>"Yes"</span>, <span class='m'>1</span>, <span class='m'>0</span>)) <span class='o'>%&gt;%</span>
-  <span class='nf'>select</span>(<span class='k'>hspd_n</span>, <span class='k'>PERWT</span>, <span class='k'>YEAR</span>, <span class='k'>poverty</span>)
-
-<span class='c'># And we can call the bootstrap function</span>
-<span class='k'>boot_results</span> <span class='o'>&lt;-</span> <span class='nf'>bootstrap_pums</span>(df = <span class='k'>df_in</span>, num_samples = <span class='m'>100</span>, group_vars = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>, <span class='k'>poverty</span>))
-
-<span class='k'>df_plt</span> <span class='o'>&lt;-</span> <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
-  <span class='nf'>full_join</span>(<span class='k'>boot_results</span>, by = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='s'>"poverty"</span>, <span class='s'>"YEAR"</span>)) <span class='o'>%&gt;%</span>
-  <span class='nf'>transmute</span>(Year = <span class='k'>YEAR</span>,
-            `Poverty Status` = <span class='k'>poverty</span>,
-            Percent = <span class='m'>100</span> <span class='o'>*</span> <span class='k'>percent_hspd</span>,
-            me = <span class='m'>100</span> <span class='o'>*</span> <span class='m'>1.96</span> <span class='o'>*</span> <span class='k'>sd</span>) 
-
-<span class='k'>plt_pov</span> <span class='o'>&lt;-</span> <span class='nf'>plt_by</span>(<span class='k'>df_plt</span>, <span class='k'>`Poverty Status`</span>,title_text = <span class='s'>"High Speed Internet Access by Poverty Status"</span>)
-
-<span class='k'>plt_pov</span>
-
-</code></pre>
 <img src="figs/unnamed-chunk-27-1.png" width="700px" style="display: block; margin: auto;" />
 
 </div>
@@ -626,10 +607,107 @@ Poverty Status
 Age
 ---
 
+The age varible in IPUMS is the most straightforward, it's just numeric age. It is worth pointing out that this is based on individual ages, while high speed internet is a household level variable. If we really wanted to do a deep dive into just age, we'd want to look at the age composition of the whole household. The really nice thing about microdata is we can slice and dice it any way we think is appropriate. So if you want to look at households that have individuals under 18 and over 65, you can. If you want to look at households with no one under 65, you can. I've just taken a high level cut of the data here though.
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># Coding an age variable using case_when</span>
+<span class='k'>df</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(age = <span class='nf'>case_when</span>(
+            <span class='k'>AGE</span> <span class='o'>&lt;=</span> <span class='m'>18</span> <span class='o'>~</span> <span class='s'>"18 and under"</span>,
+            <span class='k'>AGE</span> <span class='o'>&gt;</span> <span class='m'>18</span> <span class='o'>&amp;</span> <span class='k'>AGE</span> <span class='o'>&lt;=</span> <span class='m'>64</span> <span class='o'>~</span> <span class='s'>"19 to 64"</span>,
+            <span class='k'>AGE</span> <span class='o'>&gt;</span> <span class='m'>64</span> <span class='o'>~</span> <span class='s'>"65+"</span>,
+            <span class='kc'>TRUE</span> <span class='o'>~</span> <span class='m'>NA_character_</span>
+          ))
+
+<span class='k'>df_group</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>group_by</span>(<span class='k'>hspd_int</span>, <span class='k'>age</span>, <span class='k'>YEAR</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>summarize</span>(count = <span class='nf'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span>(<span class='k'>PERWT</span>), .groups = <span class='s'>"drop"</span>)
+
+<span class='c'># Pivot for easier percent calculations</span>
+<span class='k'>df_wide</span> <span class='o'>&lt;-</span> <span class='k'>df_group</span>  <span class='o'>%&gt;%</span>
+  <span class='nf'>pivot_wider</span>(id_cols = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>age</span>, <span class='k'>YEAR</span>), names_from = <span class='k'>hspd_int</span>, values_from = <span class='k'>count</span>) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(percent_hspd = (<span class='k'>Yes</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span>)),
+         percent_no = <span class='m'>1</span> <span class='o'>-</span> <span class='k'>percent_hspd</span>, 
+         percent_NA = (<span class='k'>`NA`</span> <span class='o'>/</span> (<span class='k'>Yes</span> <span class='o'>+</span> <span class='k'>No</span> <span class='o'>+</span> <span class='k'>`NA`</span>)))
+</code></pre>
+
+</div>
+
+<div class="highlight">
+
+<img src="figs/unnamed-chunk-29-1.png" width="700px" style="display: block; margin: auto;" />
+
+</div>
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># We do need to prep the data a little so that we're not carrying through the whole dataframe.</span>
+<span class='k'>df_in</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='o'>!</span><span class='nf'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='k'>hspd_int</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(hspd_n = <span class='nf'>if_else</span>(<span class='k'>hspd_int</span> <span class='o'>==</span> <span class='s'>"Yes"</span>, <span class='m'>1</span>, <span class='m'>0</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>select</span>(<span class='k'>hspd_n</span>, <span class='k'>PERWT</span>, <span class='k'>YEAR</span>, <span class='k'>age</span>)
+
+<span class='c'># And we can call the bootstrap function</span>
+<span class='k'>boot_results</span> <span class='o'>&lt;-</span> <span class='nf'>bootstrap_pums</span>(df = <span class='k'>df_in</span>, num_samples = <span class='m'>100</span>, group_vars = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>, <span class='k'>age</span>))
+
+<span class='k'>df_plt</span> <span class='o'>&lt;-</span> <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>full_join</span>(<span class='k'>boot_results</span>, by = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='s'>"age"</span>, <span class='s'>"YEAR"</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>transmute</span>(Year = <span class='k'>YEAR</span>,
+            `Age Group` = <span class='k'>age</span>,
+            Percent = <span class='m'>100</span> <span class='o'>*</span> <span class='k'>percent_hspd</span>,
+            me = <span class='m'>100</span> <span class='o'>*</span> <span class='m'>1.96</span> <span class='o'>*</span> <span class='k'>sd</span>) 
+
+<span class='k'>plt_age</span> <span class='o'>&lt;-</span> <span class='nf'>plt_by</span>(<span class='k'>df_plt</span>, <span class='k'>`Age Group`</span>,title_text = <span class='s'>"High Speed Internet Access by Age Group"</span>)
+
+<span class='k'>plt_age</span>
+
+</code></pre>
+<img src="figs/unnamed-chunk-30-1.png" width="700px" style="display: block; margin: auto;" />
+
+</div>
+
 Geography
 ---------
 
-Urban v. Suburban v. Rural
+IPUMs provides categorizations of where people live as either being in a prinicipal city, in the metro but not the principal city, or outside of a metro area. I have chosen to present this as the more familiar (and shorter) urban, suburban, and rural. IPUMS also has a direct measure of density that would be useful in an analysis - but for tables and graphs the categorial variable is better.
+
+<div class="highlight">
+
+</div>
+
+<div class="highlight">
+
+<img src="figs/unnamed-chunk-32-1.png" width="700px" style="display: block; margin: auto;" />
+
+</div>
+
+<div class="highlight">
+
+<pre class='chroma'><code class='language-r' data-lang='r'><span class='c'># We do need to prep the data a little so that we're not carrying through the whole dataframe.</span>
+<span class='k'>df_in</span> <span class='o'>&lt;-</span> <span class='k'>df</span> <span class='o'>%&gt;%</span>
+  <span class='nf'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='o'>!</span><span class='nf'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='k'>hspd_int</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>mutate</span>(hspd_n = <span class='nf'>if_else</span>(<span class='k'>hspd_int</span> <span class='o'>==</span> <span class='s'>"Yes"</span>, <span class='m'>1</span>, <span class='m'>0</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>select</span>(<span class='k'>hspd_n</span>, <span class='k'>PERWT</span>, <span class='k'>YEAR</span>, <span class='k'>metro</span>)
+
+<span class='c'># And we can call the bootstrap function</span>
+<span class='k'>boot_results</span> <span class='o'>&lt;-</span> <span class='nf'>bootstrap_pums</span>(df = <span class='k'>df_in</span>, num_samples = <span class='m'>100</span>, group_vars = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='k'>YEAR</span>, <span class='k'>metro</span>))
+
+<span class='k'>df_plt</span> <span class='o'>&lt;-</span> <span class='k'>df_wide</span> <span class='o'>%&gt;%</span>
+  <span class='nf'>full_join</span>(<span class='k'>boot_results</span>, by = <span class='nf'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='s'>"metro"</span>, <span class='s'>"YEAR"</span>)) <span class='o'>%&gt;%</span>
+  <span class='nf'>transmute</span>(Year = <span class='k'>YEAR</span>,
+            `Metropolitan Status` = <span class='k'>metro</span>,
+            Percent = <span class='m'>100</span> <span class='o'>*</span> <span class='k'>percent_hspd</span>,
+            me = <span class='m'>100</span> <span class='o'>*</span> <span class='m'>1.96</span> <span class='o'>*</span> <span class='k'>sd</span>) 
+
+<span class='k'>plt_metro</span> <span class='o'>&lt;-</span> <span class='nf'>plt_by</span>(<span class='k'>df_plt</span>, <span class='k'>`Metropolitan Status`</span>,title_text = <span class='s'>"High Speed Internet Access by Metropolitan Status"</span>)
+
+<span class='k'>plt_metro</span>
+
+</code></pre>
+<img src="figs/unnamed-chunk-33-1.png" width="700px" style="display: block; margin: auto;" />
+
+</div>
 
 Mapping the Data
 ================

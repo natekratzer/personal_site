@@ -786,7 +786,9 @@ plt_race
 
 ## Poverty Status
 
-```{r}
+I'm going to skip showing the code for Poverty, Age, and Geography because it's extremely similar to the code used for Race. The poverty variable in the IPUMS data is measured in income as a percent of the poverty line. So for this analysis I code under 100 as being in poverty, between 100 and 200 percent of the poverty line as near poverty, and above 200 percent as not being in poverty. 
+
+```{r, echo = FALSE}
 # Coding a poverty variable using case_when
 df <- df %>%
   mutate(poverty = case_when(
@@ -851,7 +853,7 @@ df_wide %>%
   gtsave("hspd_int_by_poverty.png", zoom = 5)
 ```
 
-```{r}
+```{r, echo = FALSE}
 # We do need to prep the data a little so that we're not carrying through the whole dataframe.
 df_in <- df %>%
   filter(!is.na(hspd_int)) %>%
@@ -873,11 +875,12 @@ plt_pov <- plt_by(df_plt, `Poverty Status`,title_text = "High Speed Internet Acc
 plt_pov
 ```
 
-
 ## Age
 
-```{r}
-# Coding a poverty variable using case_when
+The age varible in IPUMS is the most straightforward, it's just numeric age. It is worth pointing out that this is based on individual ages, while high speed internet is a household level variable. If we really wanted to do a deep dive into just age, we'd want to look at the age composition of the whole household. The really nice thing about microdata is we can slice and dice it any way we think is appropriate. So if you want to look at households that have individuals under 18 and over 65, you can. If you want to look at households with no one under 65, you can. I've just taken a high level cut of the data here though. 
+
+```{r, echo = FALSE}
+# Coding an age variable using case_when
 df <- df %>%
   mutate(age = case_when(
             AGE <= 18 ~ "18 and under",
@@ -942,7 +945,7 @@ df_wide %>%
   gtsave("hspd_int_by_age.png", zoom = 5)
 ```
 
-```{r}
+```{r, echo = FALSE}
 # We do need to prep the data a little so that we're not carrying through the whole dataframe.
 df_in <- df %>%
   filter(!is.na(hspd_int)) %>%
@@ -964,10 +967,97 @@ plt_age <- plt_by(df_plt, `Age Group`,title_text = "High Speed Internet Access b
 plt_age
 ```
 
-
 ## Geography
 
-Urban v. Suburban v. Rural
+IPUMs provides categorizations of where people live as either being in a prinicipal city, in the metro but not the principal city, or outside of a metro area. I have chosen to present this as the more familiar (and shorter) urban, suburban, and rural. IPUMS also has a direct measure of density that would be useful in an analysis - but for tables and graphs the categorial variable is better. 
+
+```{r, echo = FALSE}
+# Coding a geography variable using case_when
+df <- df %>%
+  mutate(metro = case_when(
+            METRO == 1 ~ "Rural",
+            METRO == 2 ~ "City",
+            METRO == 3 ~ "Suburbs",
+            TRUE ~ "Mixed/Unknown"
+          ))
+
+df_group <- df %>%
+  group_by(hspd_int, metro, YEAR) %>%
+  summarize(count = sum(PERWT), .groups = "drop")
+
+# Pivot for easier percent calculations
+df_wide <- df_group  %>%
+  pivot_wider(id_cols = c(metro, YEAR), names_from = hspd_int, values_from = count) %>%
+  mutate(percent_hspd = (Yes / (Yes + No)),
+         percent_no = 1 - percent_hspd, 
+         percent_NA = (`NA` / (Yes + No + `NA`)))
+```
+
+```{r, echo = FALSE}
+df_wide %>%
+  filter(YEAR == 2018) %>%
+  gt() %>%
+  cols_hide(
+    columns = vars(YEAR)
+  ) %>%
+  tab_header(title = "Table 8: High Speed Internet Access in 2018",
+             subtitle = "By Metropolitan Status") %>%
+  fmt_number(columns = vars(No, Yes, `NA`),
+             n_sigfig = 3,
+             suffixing = TRUE) %>%
+  fmt_percent(columns = vars(percent_hspd, percent_no, percent_NA),
+              decimals = 0) %>%
+  cols_label(metro = "Metropolitan Status",
+             percent_hspd = "Yes",
+             percent_no = "No",
+             percent_NA = "NA") %>%
+  cols_move(columns = vars(percent_hspd, percent_no, percent_NA, Yes, No, `NA`),
+            after = vars(metro)) %>%
+  tab_spanner(
+    label = "Number of People",
+    columns = vars(Yes, No, `NA`)
+  ) %>%
+  tab_spanner(
+    label = "Percent",
+    columns = vars(percent_hspd, percent_no, percent_NA)
+  ) %>%
+  cols_align(align = "center") %>%
+  tab_source_note(
+    source_note = md("Yes and No percentages are calculated out of those who answered. NA is reported out of all the data to provide context on how much data is missing.")
+  ) %>%
+  tab_source_note(
+    source_note = md("Source: Author's analysis of IPUMS data.")
+  ) %>%
+  opt_row_striping(row_striping = TRUE) %>%
+  opt_table_outline() %>%
+  tab_options(
+    table.font.size = px(12),
+    table.width = pct(50)
+  ) %>%
+  gtsave("hspd_int_by_geography.png", zoom = 5)
+```
+
+```{r, echo = FALSE}
+# We do need to prep the data a little so that we're not carrying through the whole dataframe.
+df_in <- df %>%
+  filter(!is.na(hspd_int)) %>%
+  mutate(hspd_n = if_else(hspd_int == "Yes", 1, 0)) %>%
+  select(hspd_n, PERWT, YEAR, metro)
+
+# And we can call the bootstrap function
+boot_results <- bootstrap_pums(df = df_in, num_samples = 100, group_vars = c(YEAR, metro))
+
+df_plt <- df_wide %>%
+  full_join(boot_results, by = c("metro", "YEAR")) %>%
+  transmute(Year = YEAR,
+            `Metropolitan Status` = metro,
+            Percent = 100 * percent_hspd,
+            me = 100 * 1.96 * sd) 
+
+plt_metro <- plt_by(df_plt, `Metropolitan Status`,title_text = "High Speed Internet Access by Metropolitan Status")
+
+plt_metro
+```
 
 
 # Mapping the Data
