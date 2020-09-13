@@ -4,12 +4,12 @@ output: hugodown::md_document
 
 title: "How to Use Census Microdata to Analyze High Speed Internet in Kentucky"
 subtitle: ""
-summary: ""
+summary: "This post is a start to finish descriptive analysis of high speed internet access in Kentucky, including tables, graphs, and maps. All of the detail of cleaning the data and iterating while exploring the data is included."
 authors: [admin]
 tags: []
 categories: []
-date: 2020-08-29
-lastmod: 2020-08-29
+date: 2020-09-13
+lastmod: 2020-09-13
 featured: false
 draft: false
 
@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 2448d42ecd163ae9
+rmd_hash: 64e39f2353b2fa6d
 
 ---
 
@@ -36,7 +36,7 @@ Introduction
 
 This post is a start to finish descriptive analysis of high speed internet access in Kentucky, including tables, graphs, and maps. All of the detail of cleaning the data and iterating while exploring the data is included. This makes for a rather lengthy post, but it also makes it relatively unique in including all of those steps. We go through five attempts at making a table of high speed internet before finally getting it right! There's quite a bit of cleaning work and then also a detour into calculating standard errors via bootstrap so we can correctly display uncertainty in our visuals.
 
-Census microdata is individual level data provided by the census. Most references to census data refer to tables the census bureau has already made out of their surveys, but the mostly raw survey data is available at the individual level, and that's what we'll use for this analysis. While the focus is on the census data, I do show the code used for analysis. I did decide to hide the code used to make all the tables (it gets rather lengthy), but you can see that code [on Github](https://github.com/natekratzer/personal_site/blob/more_posts/content/post/internet_census_microdata/index.Rmd) if interested.
+Census microdata is individual level data provided by the census. Most references to census data refer to tables the census bureau has already made out of their surveys, but the mostly raw survey data is available at the individual level, and that's what we'll use for this analysis. While the focus is on the census data, I do show the code used for analysis. I did decide to hide the code used to make all the tables (it gets rather lengthy), but you can see that code [on Github](https://github.com/natekratzer/personal_site/blob/master/content/post/internet_census_microdata/index.Rmd) if interested.
 
 Getting the Data
 ================
@@ -778,5 +778,5 @@ Conclusion and next steps
 
 The one thing we haven't really touched on in this blog is applying this data. The focus is here is intentionally on getting to know the data and making descriptive statistics. A clear next step to making the analysis useful though is to start talking to subject matter experts. Is internet access better in other states? Other countries? Are there cities where access is higher? How did they do it? What's the history of our broadband infrastructure? I recommend this [article](https://www.theatlantic.com/technology/archive/2020/08/virtual-learning-when-you-dont-have-internet/615322/) from the Atlantic as a starting point if you're interested in the high speed internet question. No matter what data you're analyzing though, you'll need to put it in context both to know how to explore and model it, and also to communicate the results in a way that will be meaningful to other people.
 
-Once you get the hang of working with Census microdata it unlocks the ability to answer some really interesting questions. Like all analytics work, it's important to first get to know the data, which is why we spent so long at the top of this post making wrong tables until figuring out the data structure. Visualizing uncertainty is also important when working with survey data. There are still a few places this analysis could be cleaned up. As one example, while I made functions for bootstrapping standard errors and for graphing the data over time, some of the cleaning code could be functionalized rather than repeated. We could also start to look at how the categories we've analyzed (race, poverty, age, geography) overlap, either using more detailed crosstabs or by building some models. The goal here though was to show what a full analysis would look like, including stumbling through some of the initial exploration of the data. Hope it was helpful, and feel free to drop questions in the comments section below!
+Once you get the hang of working with Census microdata it unlocks the ability to answer some really interesting questions. Like all analytics work, it's important to first get to know the data, which is why we spent so long at the top of this post making wrong tables until figuring out the data structure. Visualizing uncertainty is also important when working with survey data. There are still a few places this analysis could be cleaned up. As one example, while I made functions for bootstrapping standard errors and for graphing the data over time, some of the cleaning code could be functionalized rather than repeated. The code should also be rearranged so that all the data gets recoded at the beginning rather than doing it piecemeal on an as needed basis. We could also start to look at how the categories we've analyzed (race, poverty, age, geography) overlap, either using more detailed crosstabs or by building some models. The goal here though was to show what a full analysis would look like, including stumbling through some of the initial exploration of the data. Hope it was helpful, and feel free to drop questions in the comments section below!
 
