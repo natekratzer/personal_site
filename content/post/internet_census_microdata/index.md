@@ -27,7 +27,7 @@ image:
 #   E.g. `projects = ["internal-project"]` references `content/project/deep-learning/index.md`.
 #   Otherwise, set `projects = []`.
 projects: []
-rmd_hash: 4f711cc8baf59e14
+rmd_hash: 9ee9e8a9b96fddeb
 
 ---
 
@@ -115,7 +115,7 @@ Now that we have a high speed internet category we can group the data and count 
 
 </div>
 
-This table is actually wrong for multiple reasons, but the first one we'll take care of is the failure to use weights. Survey data is often weighted to make it representative of the population. The census bureau provides a `PERWT` variable that should be used as the weight for each person in the file. There's also a `HHWT` variable for household level analysis. We'll stick with weighting the data by the number of people. One of the really nice features of the `PERWT` variable is that it sumes to the population. That means our tables can show both an overall number of people and the percentage of people.
+This table is actually wrong for multiple reasons, but the first one we'll take care of is the failure to use weights. Survey data is often weighted to make it representative of the population. The census bureau provides a `PERWT` variable that should be used as the weight for each person in the file. There's also a `HHWT` variable for household level analysis. We'll stick with weighting the data by the number of people. One of the really nice features of the `PERWT` variable is that it sums to the population. That means our tables can show both an overall number of people and the percentage of people.
 
 <div class="highlight">
 
@@ -147,7 +147,7 @@ This table is actually wrong for multiple reasons, but the first one we'll take 
 This is better. The second problem is harder to spot. There are 3 hints in the data:
 
 1.  There is a very high percentage of NA responses. There are more NA answers than there are people who say they don't have high speed access.
-2.  Percent of of people with high speed access is going down over time, while the number of NA answers is going up.
+2.  Percent of of people with high speed access is going down over time, which isn't what I'd expect to see. That doesn't mean it's wrong - sometimes the data shows high level trends we don't expect. However, it's always worth a second look when you get a counterintuitive result.
 3.  These numbers look very high for Kentucky.
 
 A sensible guess is that people who say they don't have internet access at all aren't then asked about high speed internet and show up as an NA value when we want to code them as not having high speed interent.
