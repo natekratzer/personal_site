@@ -10,7 +10,7 @@ authors:
 superuser: true
 
 # Role/position
-role: Senior Data Scientist
+role: Data Science Manager
 
 # Organizations/Affiliations
 organizations:
@@ -70,4 +70,4 @@ user_groups:
 - Visitors
 ---
 
-I am an amateur philosopher with an interest in poverty and inequality research. I work as a Senior Data Scientist at Brown-Forman. I also do data analysis for the [Greater Louisville Project](http://greaterlouisvilleproject.org/) and volunteer as a mentor at [Code Louisville](https://codelouisville.org/)
+I am an amateur philosopher with an interest in poverty and inequality research. I work as a Data Science Manager at Brown-Forman. I also teach a class in AI and Ethics at the University of Louisville, and a class in the public policy process at the University of Kentucky. In my spare time I like biking, hiking, and reading. 
