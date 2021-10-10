@@ -5,6 +5,7 @@ date: '2020-09-13'
 slug: internet_census_microdata
 categories: [R, Policy, Census]
 tags: [R, internet, policy, survey, census, microdata]
+summary: "This post is a start to finish descriptive analysis of high speed internet access in Kentucky, including tables, graphs, and maps. All of the detail of cleaning the data and iterating while exploring the data is included. This makes for a rather lengthy post, but it also makes it relatively unique in including all of those steps. We go through five attempts at making a table of high speed internet before finally getting it right! There's quite a bit of cleaning work and then also a detour into calculating standard errors via bootstrap so we can correctly display uncertainty in our visuals."
 ---
 
 # Introduction

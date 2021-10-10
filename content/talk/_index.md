@@ -1,6 +1,7 @@
 ---
 author: The R Markdown Team @RStudio
 cascade:
+  draft: true
   author: The R Markdown Team @RStudio
   show_author_byline: true
   show_comments: false

@@ -1,0 +1,21 @@
+---
+title: Meritocracy is Unjust
+author: 'Nate Kratzer'
+date: '2016-10-25'
+slug: meritocracy-is-unjust
+categories: [Economics, Ethics]
+tags: [sandel, economics, meritocracy]
+summary: "Meritocracy tends to confuse a very practical sense of merit with a more abstract and moral one. An individual may deserve a high-paying job or admission to a selective college because they are productive or qualified. However, in a moral sense, individuals do not merit the skills and abilities they are born with, nor do they merit the environments they were born into that allowed them to develop those skills."
+---
+
+Equality of opportunity is one of the few goals that is still shared by policymakers in both parties (who disagree on how to achieve it, but pay it considerable lip service in speeches). It’s also shared by academics who spend considerable time and effort measuring just how likely it is that a child born to poor parents will end up middle-class or wealthy. Equality of opportunity and the meritocratic society it envisions (one where everyone has an equal opportunity to get what they deserve) assumes that the important thing is that those who deserve it have the opportunity to attain high economic outcomes.
+
+To think that a more meritocratic society is a just one that is worth striving for is to misunderstand the nature of what it means to deserve something. Meritocracy tends to confuse a very practical sense of merit with a more abstract and moral one. An individual may deserve a high-paying job or admission to a selective college because they are productive or qualified. However, in a moral sense, individuals do not merit the skills and abilities they are born with, nor do they merit the environments they were born into that allowed them to develop those skills.
+
+*Should society really be structured such that smart kids who are born into poverty are able to escape poverty while less intelligent children are not?*
+
+This is undoubtedly better than a world in which no one escapes poverty, but is genetic predisposition for problem solving really the criteria by which we should determine who is condemned to the suffering that poverty entails? For that matter, the ability to focus and the development of a strong work ethic are also determined by factors outside of a child’s control. Some of those factors are genetic, and some are environmental but none of them are actually controlled by the child. Thus from the standpoint of the lottery of birth, a meritocratic society is not just, it’s arbitrary.
+
+None of this is meant to deny the good work that is done in the name of equality of opportunity. It really is good to have better schools in poor communities. But it’s not because it means some percent of the children who are actually deserving will escape poverty (while the rest will be said to have had an opportunity and squandered it), it’s because all children deserve good schools.
+
+People don’t choose where they’re born, to whom, with what genetic predispositions, or in what sort of environment they grow up. They don’t choose their intelligence, creativity, or work ethic. Unfortunately, equality of opportunity all too often turns into a way to sort people (particularly poor people of color) into deserving and undeserving. It’s time to stop sorting, and focus on making people’s lives better (or at least a bit less harsh). None of us _deserve_ the life we’re born into. Shouldn’t those of us who were lucky enough to be born with the ability to help others use that ability to help them without stopping to inquire whether or not they deserve it?
