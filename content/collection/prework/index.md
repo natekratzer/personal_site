@@ -1,6 +1,6 @@
 ---
 date: "2021-01-01"
-draft: false
+draft: true
 excerpt: How to prepare ahead of time.
 subtitle: ""
 title: Prework

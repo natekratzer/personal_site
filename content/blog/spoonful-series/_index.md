@@ -36,6 +36,7 @@ sidebar:
   text_link_url: ""
   title: A Spoonful of Hugo
 title: A Spoonful of Hugo
+draft: true
 ---
 
 ** No content below YAML for the series _index. This file is a leaf bundle, and provides settings for the listing page layout and sidebar content.**

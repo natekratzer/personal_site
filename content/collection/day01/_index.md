@@ -12,6 +12,7 @@ show_post_thumbnail: true
 subtitle: All about Day 01 of 'Introduce Yourself Online'.
 title: Day 01
 weight: 2
+draft: true
 ---
 
 If you choose `layout: single-series`, you can add markdown text here and it will be the landing page for this nested subsection.
