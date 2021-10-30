@@ -3,7 +3,8 @@
   <meta charset="utf-8">
   <meta name="generator" content="quarto-0.2.241">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>intro_pres_income</title>
+  <meta name="author" content="Nate Kratzer">
+  <title>Python Demo</title>
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -167,19 +168,44 @@
 <body>
 <div id="quarto-content" class="container-fluid page-layout-article">
 <div class="page-columns">
+<nav id="TOC" role="doc-toc" class="g-col-md-6 g-col-lg-4 px-3 d-none d-md-block sidebar sidebar-toc order-last">
+<h2 id="toc-title">Table of contents</h2>
+<ul>
+<li><a href="#presidents-and-income" class="nav-link active" data-scroll-target="#presidents-and-income">Presidents and Income</a>
+<ul class="collapse">
+<li><a href="#an-intro-to-python" class="nav-link" data-scroll-target="#an-intro-to-python">An intro to python</a></li>
+</ul></li>
+<li><a href="#first-data-source-income" class="nav-link" data-scroll-target="#first-data-source-income">First Data Source: Income</a></li>
+<li><a href="#second-data-source-presidents" class="nav-link" data-scroll-target="#second-data-source-presidents">Second Data Source: Presidents</a></li>
+<li><a href="#graphing-with-altair" class="nav-link" data-scroll-target="#graphing-with-altair">Graphing with Altair</a></li>
+<li><a href="#graphing-with-plotly" class="nav-link" data-scroll-target="#graphing-with-plotly">Graphing with Plotly</a></li>
+</ul>
+</nav>
 <main class="content">
+<header id="title-block-header">
+<h1 class="title display-7">Python Demo</h1>
+<p class="author">Nate Kratzer</p>
+<p class="date">Oct 30th, 2021</p>
+</header>
+
 <section id="presidents-and-income" class="level2">
 <h2 class="anchored" data-anchor-id="presidents-and-income">Presidents and Income</h2>
 <section id="an-intro-to-python" class="level3">
 <h3 class="anchored" data-anchor-id="an-intro-to-python">An intro to python</h3>
 <p>In this notebook we’ll use historical data to look at the relationships between presidential parties and income growth.</p>
 <p>The first step is to import the libraries we need for the analysis.</p>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np <span class="co">#a numerical python library for working with arrays</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd <span class="co"># data science library for dataframes and data manipulation</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> altair <span class="im">as</span> alt <span class="co"># a graphing library</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os <span class="co">#operating system library to set the working directory</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># setting the working directory locally. This is a step you need to change</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># os.chdir("/Users/bi6fgjk/Documents/pers/py_study") </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 </section>
 <section id="first-data-source-income" class="level1">
@@ -189,8 +215,11 @@
 <p>All values are in 2019 dollars as provided by the Census.</p>
 <p>Footnotes to the data are available here: https://www.census.gov/topics/income-poverty/income/guidance/cps-historic-footnotes.html</p>
 <div class="cell" data-execution_count="3">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>hist_df <span class="op">=</span> pd.read_csv(<span class="st">"https://raw.githubusercontent.com/natekratzer/hist_income_by_quintile/main/hist_income47.csv"</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>hist_df.tail(<span class="dv">8</span>) <span class="co">#checking the last 8 rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="3">
 <div>
 
@@ -284,13 +313,19 @@
 </div>
 </div>
 </div>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># suppose I want to inspect the data more</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># an easy way is to write a quick .csv file and then open it still in Jupyter Lab</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>hist_df.to_csv(<span class="st">"explore_my_data.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <p>The year column has footnotes in it that are marked off with parentheses. So I googled ‘Regular Expression to remove everything in parentheses’.</p>
 <div class="cell" data-execution_count="5">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>hist_df[<span class="st">'Year'</span>] <span class="op">=</span> hist_df[<span class="st">'Year'</span>].<span class="bu">str</span>.replace(<span class="vs">r"\(.*\)"</span>, <span class="st">""</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>hist_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-stderr">
 <pre><code>/tmp/ipykernel_25017/2993922613.py:1: FutureWarning: The default value of regex will change from True to False in a future version.
   hist_df['Year'] = hist_df['Year'].str.replace(r"\(.*\)", "")</code></pre>
@@ -362,13 +397,19 @@
 </div>
 </div>
 <p>Here I’m going to define a function for the first time. This is a function to replace all commas with nothing at all (i.e.&nbsp;to remove commas).</p>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> comma_replace(x):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> x.<span class="bu">str</span>.replace(<span class="st">','</span>, <span class="st">''</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <p>Next I’m using the apply command to apply the function to every column in my dataframe.</p>
 <div class="cell" data-execution_count="7">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>hist_df <span class="op">=</span> hist_df.<span class="bu">apply</span>(comma_replace)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>hist_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="7">
 <div>
 
@@ -436,6 +477,8 @@
 </div>
 </div>
 <p>Dictionaries are a core Python type, and they are used here to map each column name onto the type of data in that column.</p>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>type_dict <span class="op">=</span> {</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Year'</span> : <span class="st">'datetime64[ns]'</span>,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'20'</span>   : <span class="st">'int32'</span>,</span>
@@ -444,8 +487,12 @@
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'80'</span>   : <span class="st">'int32'</span>,</span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'95'</span>   : <span class="st">'int32'</span></span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell" data-execution_count="9">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>type_dict</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="9">
 <pre><code>{'Year': 'datetime64[ns]',
  '20': 'int32',
@@ -457,9 +504,12 @@
 </div>
 <p>Now I’m changing the types of all my columns using the dictionary created above. Just to demonstrate and check that things worked, I’m adding two columns together. It doesn’t really make sense to do this for the analysis, but it gives us a chance to show to drop columns in the next code chunk.</p>
 <div class="cell" data-execution_count="10">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>hist_df <span class="op">=</span> hist_df.astype(type_dict)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>hist_df[<span class="st">'add 20 and 40'</span>] <span class="op">=</span> hist_df[<span class="st">'20'</span>] <span class="op">+</span> hist_df[<span class="st">'40'</span>] <span class="co">#to show it's numeric</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>hist_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="10">
 <div>
 
@@ -533,8 +583,11 @@
 </div>
 </div>
 <div class="cell" data-execution_count="11">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>hist_df <span class="op">=</span> hist_df.drop(columns <span class="op">=</span> [<span class="st">'add 20 and 40'</span>])</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>hist_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="11">
 <div>
 
@@ -605,9 +658,12 @@
 <p>We’re going to do that by grouping the data by year and then calling the mean function, so it’ll take the mean within each year. When we do this, year is going to move into the index column for pandas. The index is sometimes a bit strange to get used to, but pandas was initially designed around time series data, and having a time dimension as the index is a pretty natural fit for the way pandas works. Among other things, it’s going to make calculating percent change much easier.</p>
 <p>The index does wind up rearranging the dataframe a bit from what we’re used to though, so I’m going to call .tail() instead of .head() to see the most recent years.</p>
 <div class="cell" data-execution_count="12">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>hist_df <span class="op">=</span> hist_df.groupby([<span class="st">'Year'</span>]).mean() <span class="co">#have to call mean before taking percent change, not sure why?</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>hist_df <span class="op">=</span> hist_df.pct_change()</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>hist_df.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="12">
 <div>
 
@@ -677,7 +733,10 @@
 </div>
 </div>
 <div class="cell" data-execution_count="13">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>hist_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="13">
 <div>
 
@@ -748,6 +807,8 @@
 </div>
 <p>Notice that we have some NAs, and also that percent is scaled from 0 to 1 and not 0 to 100. Let’s drop the NA row we created by calculating percent change and rescale everything to 100. This is another chance to create and apply a simple function.</p>
 <div class="cell" data-execution_count="14">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>hist_df <span class="op">=</span> hist_df.dropna()</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mult100(x):</span>
@@ -757,6 +818,7 @@
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># hist_df = hist_df.apply(lambda x: x * 100)</span></span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>hist_df <span class="op">=</span> hist_df.<span class="bu">apply</span>(mult100)</span>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>hist_df.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="14">
 <div>
 
@@ -830,6 +892,8 @@
 <h1>Second Data Source: Presidents</h1>
 <p>Now we’re ready to pull in some additional data. Like the data above we’re also going to change the types of the data and set the index to year.</p>
 <div class="cell" data-execution_count="15">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in .csv file hosted on Github</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>pres_df <span class="op">=</span> pd.read_csv(<span class="st">"https://raw.githubusercontent.com/natekratzer/hist_income_by_quintile/main/pres_year.csv"</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -852,6 +916,7 @@
 <span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>pres_df <span class="op">=</span> pres_df.set_index(<span class="st">"Year"</span>)</span>
 <span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>pres_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="15">
 <div>
 
@@ -915,8 +980,11 @@
 </div>
 <p>Now we’re going to join the files. Having them set to the same index makes this easier. The new data we’ve read in tells us who was president that year, which term it was for them, if they are a Democrat or not, and if it was the second term of the presidency or not.</p>
 <div class="cell" data-execution_count="16">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pres_df.join(hist_df) <span class="co"># join is for joining on an index, if you need to combine datasets not using the index then 'merge' is the pandas command to use</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="16">
 <div>
 
@@ -1014,16 +1082,22 @@
 </div>
 </div>
 <p>A president’s policies don’t go into effect the day they come into office. So we’ll look at this data both as is, and with a one year lag. To do that, we’ll lag the presidents dataframe and then join it with the historical data and call that dataframe df_lag</p>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pres_lag_df <span class="op">=</span> pres_df.shift(periods <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>df_lag <span class="op">=</span> pres_lag_df.join(hist_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 <section id="graphing-with-altair" class="level1">
 <h1>Graphing with Altair</h1>
 <p>I’m going to transform the data from wide to long in order to prepare to graph it in altair. In pandas, this is accomplished with the melt function. For the analysis I’m trying to graph the rate of growth at each Percentile and compare that to whether or not the president at the time was a Democrat.</p>
 <div class="cell" data-execution_count="18">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.melt(df, id_vars <span class="op">=</span> [<span class="st">'Democrat'</span>], value_vars <span class="op">=</span>[<span class="st">'20'</span>, <span class="st">'40'</span>, <span class="st">'60'</span>, <span class="st">'80'</span>, <span class="st">'95'</span>], ignore_index <span class="op">=</span> <span class="va">False</span>, var_name <span class="op">=</span> <span class="st">"Percentile"</span>, value_name <span class="op">=</span> <span class="st">"Growth"</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>df_lag <span class="op">=</span> pd.melt(df_lag, id_vars <span class="op">=</span> [<span class="st">'Democrat'</span>], value_vars <span class="op">=</span>[<span class="st">'20'</span>, <span class="st">'40'</span>, <span class="st">'60'</span>, <span class="st">'80'</span>, <span class="st">'95'</span>], ignore_index <span class="op">=</span> <span class="va">False</span>, var_name <span class="op">=</span> <span class="st">"Percentile"</span>, value_name <span class="op">=</span> <span class="st">"Growth"</span>)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="18">
 <div>
 
@@ -1079,6 +1153,8 @@
 </div>
 </div>
 <p>I’m also going to change the true/false labels to something more human readable and assign colors for the chart.</p>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># np.where is like and if_else statement for recoding an entire column</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'Party'</span>] <span class="op">=</span> np.where(df[<span class="st">'Democrat'</span>]<span class="op">==</span> <span class="va">True</span>, <span class="st">'Dem'</span>, <span class="st">'Rep'</span>)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>df_lag[<span class="st">'Party'</span>] <span class="op">=</span> np.where(df_lag[<span class="st">'Democrat'</span>]<span class="op">==</span> <span class="va">True</span>, <span class="st">'Dem'</span>, <span class="st">'Rep'</span>)</span>
@@ -1086,8 +1162,11 @@
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#set up for colors</span></span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>domain <span class="op">=</span> [<span class="st">'Dem'</span>, <span class="st">'Rep'</span>]</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>range_ <span class="op">=</span> [<span class="st">'blue'</span>, <span class="st">'red'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <p>Finally I can graph. I pretty much just followed an example from the altair documentation here: https://altair-viz.github.io/</p>
 <div class="cell" data-execution_count="20">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Unlagged chart</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>chart <span class="op">=</span> alt.Chart(df).mark_bar().encode(</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    alt.X(<span class="st">'Party'</span>, title <span class="op">=</span> <span class="st">""</span>),</span>
@@ -1103,6 +1182,7 @@
 <span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Or just print it inside the notebook</span></span>
 <span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>chart</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="20">
 
 <div id="altair-viz-a51faef7130e41feaa656bc5b5639e0b"></div>
@@ -1158,6 +1238,8 @@
 </div>
 <p>And here’s the lagged version</p>
 <div class="cell" data-execution_count="21">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>chart_lag <span class="op">=</span> alt.Chart(df_lag).mark_bar().encode(</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    alt.X(<span class="st">'Party'</span>, title <span class="op">=</span> <span class="st">""</span>),</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    alt.Y(<span class="st">'mean(Growth)'</span>, title <span class="op">=</span> <span class="st">"Percent Growth"</span>),</span>
@@ -1167,6 +1249,7 @@
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    title <span class="op">=</span> <span class="st">'Avg Annual Income Growth, 1947-2019, 1 year lag'</span></span>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>chart_lag</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="21">
 
 <div id="altair-viz-5f17d9aea53747bb9c8cf4a71871eea2"></div>
@@ -1225,12 +1308,18 @@
 <section id="graphing-with-plotly" class="level1">
 <h1>Graphing with Plotly</h1>
 <p>Plotly is a popular graphing library, and while I like Altair, Plotly is probably more widely used, so I’m going to recreate the above graphs using Plotly. (Working with it a little more though, the Python interface to Plotly is not as good as the R one. I’ll leave this here, but I think I recommend learning Altair.</p>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell" data-execution_count="23">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Altair let us take the mean of growth within the plot itself. For Plotly We'll need to set up a bit more first. </span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>df_plot <span class="op">=</span> df.groupby([<span class="st">'Party'</span>, <span class="st">'Percentile'</span>]).mean()</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>df_plot <span class="op">=</span> df_plot.reset_index() <span class="co">#Essentially undoing the groupby and gettig us back to the type of dataframe plotly expects. </span></span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>df_plot.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display" data-execution_count="23">
 <div>
 
@@ -1286,8 +1375,11 @@
 </div>
 </div>
 <div class="cell" data-execution_count="24">
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> px.bar(df_plot, x <span class="op">=</span> <span class="st">"Percentile"</span>, y <span class="op">=</span> <span class="st">"Growth"</span>, color <span class="op">=</span> <span class="st">"Party"</span>, barmode <span class="op">=</span> <span class="st">'group'</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>                            <div id="2afc3eb0-11c2-442a-ad6a-6d99cd7678bb" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                require(["plotly"], function(Plotly) {                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("2afc3eb0-11c2-442a-ad6a-6d99cd7678bb")) {                    Plotly.newPlot(                        "2afc3eb0-11c2-442a-ad6a-6d99cd7678bb",                        [{"alignmentgroup":"True","hovertemplate":"Party=Dem<br>Percentile=%{x}<br>Growth=%{y}<extra></extra>","legendgroup":"Dem","marker":{"color":"#636efa","pattern":{"shape":""}},"name":"Dem","offsetgroup":"Dem","orientation":"v","showlegend":true,"textposition":"auto","type":"bar","x":["20","40","60","80","95"],"xaxis":"x","y":[2.0214241003458557,1.7047675894344574,1.9339151486397552,1.90720930191028,2.0101758850130333],"yaxis":"y"},{"alignmentgroup":"True","hovertemplate":"Party=Rep<br>Percentile=%{x}<br>Growth=%{y}<extra></extra>","legendgroup":"Rep","marker":{"color":"#EF553B","pattern":{"shape":""}},"name":"Rep","offsetgroup":"Rep","orientation":"v","showlegend":true,"textposition":"auto","type":"bar","x":["20","40","60","80","95"],"xaxis":"x","y":[0.7950514665085552,1.1866857044633419,1.279552365163345,1.5589352482523051,1.791337497951483],"yaxis":"y"}],                        {"barmode":"group","legend":{"title":{"text":"Party"},"tracegroupgap":0},"margin":{"t":60},"template":{"data":{"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"#E5ECF6","showlakes":true,"showland":true,"subunitcolor":"white"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"bgcolor":"#E5ECF6","radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"bgcolor":"#E5ECF6","caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Percentile"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"Growth"}}},                        {"responsive": true}                    ).then(function(){
                             
@@ -1316,7 +1408,10 @@ if (outputEl) {{
                         })                };                });            </script>        </div>
 </div>
 </div>
+<p></p><details>
+<summary>Code</summary><p></p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> px.bar(df_plot, x <span class="op">=</span> <span class="st">"Percentile"</span>, y <span class="op">=</span> <span class="st">"Growth"</span>, color <span class="op">=</span> <span class="st">"Party"</span>, barmode <span class="op">=</span> <span class="st">'group'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 <script type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
