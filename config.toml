@@ -141,16 +141,16 @@ enableEmoji = true
   #  title = "Talks"
   #  url = "/talk/"
   #  weight = 4
-  [[menu.header]]
-    name = "Python From R"
-    title = "A collection"
-    url = "/collection/"
-    weight = 5
-  [[menu.header]]
-    name = "Ethics and AI"
-    title = "A class"
-    url = "/ethics_and_ai/"
-    weight = 6
+  #[[menu.header]]
+  #  name = "Python From R"
+  #  title = "A collection"
+  #  url = "/collection/"
+  #  weight = 5
+  #[[menu.header]]
+  #  name = "Ethics and AI"
+  #  title = "A class"
+  #  url = "/ethics_and_ai/"
+  #  weight = 6
   #[[menu.header]]
   #  name = "Elements"
   #  title = "Element Page"
