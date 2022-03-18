@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="generator" content="quarto-0.9.83">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="author" content="Nate Kratzer">
+  <meta name="dcterms.date" content="2022-03-18">
+  <title>Collider Bias and Women’s Wages</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+
+  <script src="collider_bias_files/libs/clipboard/clipboard.min.js"></script>
+  <script src="collider_bias_files/libs/quarto-html/quarto.js"></script>
+  <script src="collider_bias_files/libs/quarto-html/popper.min.js"></script>
+  <script src="collider_bias_files/libs/quarto-html/tippy.umd.min.js"></script>
+  <script src="collider_bias_files/libs/quarto-html/anchor.min.js"></script>
+  <link href="collider_bias_files/libs/quarto-html/tippy.css" rel="stylesheet">
+  <link href="collider_bias_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+  <script src="collider_bias_files/libs/bootstrap/bootstrap.min.js"></script>
+  <link href="collider_bias_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+  <link href="collider_bias_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+  <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc">
+<h2 id="toc-title">Table of contents</h2>
+<ul>
+<li><a href="#overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+<li><a href="#a-simple-example-of-confounding" class="nav-link" data-scroll-target="#a-simple-example-of-confounding">A Simple Example of Confounding</a></li>
+<li><a href="#a-much-more-important-example-womens-wages" class="nav-link" data-scroll-target="#a-much-more-important-example-womens-wages">A Much More Important Example: Women’s Wages</a></li>
+</ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+<header id="title-block-header" class="quarto-title-block default">
+
+
+
+<div class="quarto-title"><h1 class="title display-7">Collider Bias and Women’s Wages</h1></div><div class="quarto-title-meta"><div><div class="quarto-title-meta-heading">Author</div><div class="quarto-title-meta-contents"><div class="quarto-title-authors"><p>Nate Kratzer</p></div></div></div><div><div class="quarto-title-meta-heading">Published</div><div class="quarto-title-meta-contents"><p class="date">March 18, 2022</p></div></div></div></header>
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="xkcd_confounding.png" class="img-fluid figure-img"></p>
+<p></p><figcaption aria-hidden="true" class="figure-caption">https://xkcd.com/2560/</figcaption><p></p>
+</figure>
+</div>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>Human beings think in terms of stories and in terms of how the actions they take impact the things around them. It’s our natural default way of thinking, and generally it’s pretty useful.</p>
+<p>Doing data analysis doesn’t stop us from thinking in terms of stories and causation, but it should make us careful. With the increase in data and in the computing power to process it all, there have been claims that all we need in order to understand and act in the world is to listen to the data. But data does not speak for itself! It is interpretted by humans who will interpret it through the lens of causality.</p>
+<p>This is an introduction to thinking about causal models for data analysis. The purpose is to demonstrate that the popular approach of simply gathering as much data as you can and controlling for it via regression or other methods is not a good one, and is actively misleading in many cases. We should instead carefully think about plausible causal models using tools like diagrams (directed acyclic graphs, or DAGs) and then do data analysis in accordance with those models.</p>
+</section>
+<section id="a-simple-example-of-confounding" class="level2">
+<h2 class="anchored" data-anchor-id="a-simple-example-of-confounding">A Simple Example of Confounding</h2>
+<p>Let’s start with an example where using regression does make sense. I have noticed that the sports teams I like are more likely to lose when I am watching them on TV. This is true, but the idea that my watching them causes them to lose is not plausible. So either I’m mistaken in my data collection, very unlucky in my fanship (I am a fan of Cleveland sports teams, so this does seem likely), or there’s something else that explains the connection between my watching and my team losing. We can draw a simple diagram of what we’ve observed so far.</p>
+<p>(I’m using <a href="https://mermaid.live/edit">Mermaid</a> and will put the code for each diagram above them so that it’s easy to recreate and edit later).</p>
+<p>graph LR; A[Watch Game]–&gt;B[Lose Game]</p>
+<p><img src="watch_and_lose.png" class="img-fluid"></p>
+<p>The games I choose to watch are not random, I don’t watch every game my teams play, and I’m more likely to watch big games where they’re playing a quality opponent. That should also have an impact on how likely they are to win the game.</p>
+<p>graph LR; A[Good Opponent]–&gt;B[Watch Game] A[Good Opponent]–&gt;C[Lose Game] B==&gt;C</p>
+<p><img src="opp_quality.png" class="img-fluid"></p>
+<p>Once we know what the proper causal model looks like, we can see that the conclusion that my watching games caused my teams to lose was based on an incomplete view - or more technically it suffered from omitted variable bias. The analysis left out an important variable that impacted things. Once we control for opponent quality, the relationship between my watching and my team losing should go back to zero.</p>
+</section>
+<section id="a-much-more-important-example-womens-wages" class="level2">
+<h2 class="anchored" data-anchor-id="a-much-more-important-example-womens-wages">A Much More Important Example: Women’s Wages</h2>
+<p>The idea of drawing out the diagram before doing the analysis can be applied to more important cases, like the ongoing dispute around the wage gap between men and women. Here, I’m taking an example from the excellent book <em>Causal Inference: The Mixtape</em> by Scott Cunningham.</p>
+<p>When companies are accused of paying women less one of their first lines of defense is to argue that if you account for the occupational differences within the company between men and women the wage gap vanishes or at least shrinks dramatically. Cunningham (and I) think this is a poor causal model and an inadequate defense. This is important, so we’re going to consider several causal models and look directly at what they tell us using some simulated data under different specifications. Using simulated data gives us the advantage of knowing the truth of the data - so to speak - we’ll create it to have certain causal relationships and then we’ll see how the different models capture (and fail to capture) those relationships.</p>
+<p>I’ll start with the causal diagram that we’re going to use to simulate our data. It’s a bit complicated, but we’ll take it piece by piece as we move through the data simulation and modeling.</p>
+<p>graph LR; D[Discrimination] –&gt; E[Earnings] D –&gt; O[Occupation] O –&gt; E F[Female] –&gt; D A[Ability] -.-&gt; O A -.-&gt; E</p>
+<p><img src="gd_dag.png" class="img-fluid"></p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode" id="cb1"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np <span class="co"># for generating arrays with random numbers</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd <span class="co"># dataframes</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm <span class="co"># to run the actual ols model</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>) <span class="co"># to make it reproducible</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We’re going to first generate a labor force that is half female and has ability randomly distributed. In the causal model sketched above both Female and Ability are root causes - they’re not caused by anything else. So that’s the place we’ll start.</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode" id="cb2"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>generated_data <span class="op">=</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'female'</span>  : np.random.randint(low <span class="op">=</span> <span class="dv">0</span>, high <span class="op">=</span> <span class="dv">2</span>, size <span class="op">=</span> <span class="dv">10000</span>, dtype <span class="op">=</span> <span class="bu">int</span>), <span class="co">#the high argument is not inclusive, so this is randomly generating 0s and 1s. </span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'ability'</span> : np.random.normal(size <span class="op">=</span> <span class="dv">10000</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(data <span class="op">=</span> generated_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we need to generate some other variables of interest. We’re looking at the impact of discrimination, so let’s set that to be experienced by the female half of the labor force that we’ve simulated. We’re going to assume that discrimination affects both wages and choice of occupation. Here we’re worried about occupations in terms of higher and lower pay scales, so let’s set occupations to be positively associated with ability and negatively associated with discrimination.</p>
+<p>Finally, wages are negatively associated with discrimination and positively associated with both occupation and ability.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode" id="cb3"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'discrimination'</span>] <span class="op">=</span> df[<span class="st">'female'</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'occupation'</span>] <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> df[<span class="st">'ability'</span>] <span class="op">+</span> <span class="dv">0</span> <span class="op">*</span> df[<span class="st">'female'</span>] <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> df[<span class="st">'discrimination'</span>] <span class="op">+</span> np.random.normal(size <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'wage'</span>] <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="dv">1</span> <span class="op">*</span> df[<span class="st">'discrimination'</span>] <span class="op">+</span> <span class="dv">1</span> <span class="op">*</span> df[<span class="st">'occupation'</span>] <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> df[<span class="st">'ability'</span>] <span class="op">+</span> np.random.normal(size <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>df.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display" data-execution_count="10">
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>female</th>
+      <th>ability</th>
+      <th>discrimination</th>
+      <th>occupation</th>
+      <th>wage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>10000.000000</td>
+      <td>10000.000000</td>
+      <td>10000.000000</td>
+      <td>10000.000000</td>
+      <td>10000.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>0.498700</td>
+      <td>-0.008041</td>
+      <td>0.498700</td>
+      <td>-0.009388</td>
+      <td>0.471065</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>0.500023</td>
+      <td>1.004178</td>
+      <td>0.500023</td>
+      <td>2.449597</td>
+      <td>4.545405</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>0.000000</td>
+      <td>-3.922400</td>
+      <td>0.000000</td>
+      <td>-10.018905</td>
+      <td>-18.328506</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>0.000000</td>
+      <td>-0.674327</td>
+      <td>0.000000</td>
+      <td>-1.640437</td>
+      <td>-2.517222</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>0.000000</td>
+      <td>-0.007682</td>
+      <td>0.000000</td>
+      <td>-0.022777</td>
+      <td>0.482132</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>1.000000</td>
+      <td>0.668901</td>
+      <td>1.000000</td>
+      <td>1.633467</td>
+      <td>3.501387</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>1.000000</td>
+      <td>3.529055</td>
+      <td>1.000000</td>
+      <td>9.500154</td>
+      <td>16.731628</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Now that we have our simulated data with specified causal relationships, let’s look at a few different regression models. We’ll first look at a model that only includes being female as a cause of wages. Here the causal model looks like this:</p>
+<p>graph LR; A[Female]–&gt;B[Discrimination]–&gt;C[Wages]</p>
+<p><img src="mod1.png" class="img-fluid"></p>
+<p>We usually don’t have direct data on discrimination, so we use data we do observe (being female) in the regression, but the causal assumption is still that the mechanism causing the difference in wages is discrimination. In our simulated data we know there’s a 1:1 relationship between being female and being discriminated against, because we set up the discrimination variable that way.</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode" id="cb4"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set up matrices for regression</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> df[<span class="st">'wage'</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>X1 <span class="op">=</span> df[<span class="st">'female'</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> df[[<span class="st">'female'</span>, <span class="st">'occupation'</span>]]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>X3 <span class="op">=</span> df[[<span class="st">'female'</span>, <span class="st">'occupation'</span>, <span class="st">'ability'</span>]]</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># add constants to each X matrix for the intercept of the model</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>X1 <span class="op">=</span> sm.add_constant(X1)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> sm.add_constant(X2)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>X3 <span class="op">=</span> sm.add_constant(X3)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>model1 <span class="op">=</span> sm.OLS(Y, X1)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>results1 <span class="op">=</span> model1.fit()</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>results1.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-stderr">
+<pre><code>C:\Users\natek\anaconda3\lib\site-packages\statsmodels\tsa\tsatools.py:142: FutureWarning: In a future version of pandas all arguments of concat except for the argument 'objs' will be keyword-only
+  x = pd.concat(x[::order], 1)</code></pre>
+</div>
+<div class="cell-output-display" data-execution_count="11">
+<table class="simpletable">
+<caption>OLS Regression Results</caption>
+<tbody><tr>
+  <th>Dep. Variable:</th>          <td>wage</td>       <th>  R-squared:         </th> <td>   0.107</td> 
+</tr>
+<tr>
+  <th>Model:</th>                   <td>OLS</td>       <th>  Adj. R-squared:    </th> <td>   0.107</td> 
+</tr>
+<tr>
+  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   1195.</td> 
+</tr>
+<tr>
+  <th>Date:</th>             <td>Fri, 18 Mar 2022</td> <th>  Prob (F-statistic):</th> <td>2.09e-247</td>
+</tr>
+<tr>
+  <th>Time:</th>                 <td>15:44:45</td>     <th>  Log-Likelihood:    </th> <td> -28766.</td> 
+</tr>
+<tr>
+  <th>No. Observations:</th>      <td> 10000</td>      <th>  AIC:               </th> <td>5.754e+04</td>
+</tr>
+<tr>
+  <th>Df Residuals:</th>          <td>  9998</td>      <th>  BIC:               </th> <td>5.755e+04</td>
+</tr>
+<tr>
+  <th>Df Model:</th>              <td>     1</td>      <th>                     </th>     <td> </td>    
+</tr>
+<tr>
+  <th>Covariance Type:</th>      <td>nonrobust</td>    <th>                     </th>     <td> </td>    
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+     <td></td>       <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P&gt;|t|</th>  <th>[0.025</th>    <th>0.975]</th>  
+</tr>
+<tr>
+  <th>const</th>  <td>    1.9522</td> <td>    0.061</td> <td>   32.173</td> <td> 0.000</td> <td>    1.833</td> <td>    2.071</td>
+</tr>
+<tr>
+  <th>female</th> <td>   -2.9700</td> <td>    0.086</td> <td>  -34.565</td> <td> 0.000</td> <td>   -3.138</td> <td>   -2.802</td>
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+  <th>Omnibus:</th>       <td> 2.156</td> <th>  Durbin-Watson:     </th> <td>   2.014</td>
+</tr>
+<tr>
+  <th>Prob(Omnibus):</th> <td> 0.340</td> <th>  Jarque-Bera (JB):  </th> <td>   2.186</td>
+</tr>
+<tr>
+  <th>Skew:</th>          <td>-0.008</td> <th>  Prob(JB):          </th> <td>   0.335</td>
+</tr>
+<tr>
+  <th>Kurtosis:</th>      <td> 3.071</td> <th>  Cond. No.          </th> <td>    2.62</td>
+</tr>
+</tbody></table><br><br>Notes:<br>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+</div>
+</div>
+<p>We get a lot here, but what we’re mainly interested in is the coefficients, so let’s look at those. Here we see that being female has a strong negative impact on wages earned. (Don’t worry about the const (constant) term, it’s not important in this example).</p>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode" id="cb6"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>results1.params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display" data-execution_count="12">
+<pre><code>const     1.952182
+female   -2.969956
+dtype: float64</code></pre>
+</div>
+</div>
+<p>This isn’t a surprise based on how we set up the data. It also correctly reflects that in the real world if you just divide wages by gender you will find a large gender gap.</p>
+<p>The dispute comes in when we talk about controlling for occupation, or a model that looks like this:</p>
+<p><img src="control_occ.png" class="img-fluid"></p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode" id="cb8"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>model2 <span class="op">=</span> sm.OLS(Y, X2)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>results2 <span class="op">=</span> model2.fit()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>model3 <span class="op">=</span> sm.OLS(Y, X3)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>results3 <span class="op">=</span> model3.fit()</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>results2.params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display" data-execution_count="13">
+<pre><code>const         0.208846
+female        0.559992
+occupation    1.815929
+dtype: float64</code></pre>
+</div>
+</div>
+<p>Now it looks like being female might raise wages slightly. We know that’s not right since we know we set up the data to have discrimination based on the way we simulated it. The problem is that when we added occupation to the model we opened up a brand new causal pathway from being female to earnings. It’s the one that runs from Female–&gt;Discrimination–&gt;Occupation–&gt;Ability–&gt;Earnings in our original causal model.</p>
+<p>When we controlled for occupation we did two things: a) Ignored the fact that occupational choice is also a result of discrimination and as a defense of pay discrimination it would then be the mechanism by which discrimination happens, not a defense that discrimination isn’t happening. b) Opened up a causal pathway that made our estimates worse.</p>
+<p><img src="gd_dag.png" class="img-fluid"></p>
+<p>So let’s try conditioning on abilty. Here we’re back to a clear impact of gender discrimination.</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode" id="cb10"><pre class="sourceCode python cell-code code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>results3.params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display" data-execution_count="14">
+<pre><code>const         0.988717
+female       -0.986841
+occupation    1.025762
+ability       1.975298
+dtype: float64</code></pre>
+</div>
+</div>
+<p>A major problem is that in the real world we can’t observe ability directly and put it in a regression model. Another issue is that this causal model is still very incomplete. Nonetheless, the way the sign flips back and forth depending on the model is hopefully an illustration of why it’s so important to have a theoretical model and not just throw in as much data as possible.</p>
+<p>Data is a powerful way to tell stories, but data by itself <em>never</em> tells us everything we need to know. We have to interpret it carefully and think hard about the underlying models of the world we’re bringing to the data when we interpret it.</p>
+</section>
+</main>
+<!-- /main column -->
+<script type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    setTimeout(function() {
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+</body></html>
