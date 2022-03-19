@@ -33,16 +33,16 @@ fig = px.scatter(df,
                  height = 500
                  )
 
-fig.update_traces(textposition = 'top center')
-fig.update_xaxes(range = [0.6, 1.8], nticks = 7)
-fig.update_yaxes(range = [0.6, 1.8], nticks = 7,
+fig = fig.update_traces(textposition = 'top center')
+fig = fig.update_xaxes(range = [0.6, 1.8], nticks = 7)
+fig = fig.update_yaxes(range = [0.6, 1.8], nticks = 7,
                  scaleanchor = "x", # make the y axis tied to X
                  scaleratio = 1)
 
-fig.add_hline(y = 1.15, opacity = 1, line_width = 2, line_dash = 'dash', line_color = 'grey')
-fig.add_vline(x = 1.15, opacity = 1, line_width = 2, line_dash = 'dash', line_color = 'grey')
+fig = fig.add_hline(y = 1.15, opacity = 1, line_width = 2, line_dash = 'dash', line_color = 'grey')
+fig = fig.add_vline(x = 1.15, opacity = 1, line_width = 2, line_dash = 'dash', line_color = 'grey')
 
-fig.add_annotation(x = 1.6, y = 0.63, text = "Data from fbref.com", showarrow = False)
+fig = fig.add_annotation(x = 1.6, y = 0.63, text = "Data from fbref.com", showarrow = False)
 
 fig.show()
 ```
@@ -62,7 +62,7 @@ fig = px.scatter(df,
                  text = 'Abbr'
                  )
 
-fig.update_traces(textposition = 'top center') #why can't this be in the initial call?      
+fig = fig.update_traces(textposition = 'top center')      
 
 fig.show()
 ```
