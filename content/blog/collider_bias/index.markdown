@@ -1,7 +1,7 @@
 ---
 title: Think before Adding More Variables to that Analysis
 author: 'Nate Kratzer'
-date: '2020-03-19'
+date: '2022-03-19'
 slug: causal_dag
 categories: [Python, Causal]
 tags: [python, causal, earnings, dag]
