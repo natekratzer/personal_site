@@ -11,10 +11,8 @@ link_list:
   url: https://www.goodreads.com/user/show/23008088-nate
 - name: Biking
   url: https://louisvilleky.gov/government/bike-louisville
-- name: R
-  url: https://cran.r-project.org/
-- name: Python
-  url: https://www.python.org/
+- name: NWSL
+  url: https://www.racingloufc.com/
 ---
 
 ** index doesn't contain a body, just front matter above.
