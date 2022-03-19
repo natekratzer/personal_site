@@ -30,7 +30,7 @@ enableEmoji = true
 [params]
   orgName = ""
   orgLocal = ""
-  description = "Writing about R, Python, Ethical AI, and Public Policy"
+  description = "Writing about R, Python, and Public Policy"
   favicon = "/img/favicon-16x16.png"
   logo = ""
   mainSections = ["blog", "collection"]

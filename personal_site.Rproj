@@ -17,3 +17,7 @@ StripTrailingWhitespace: Yes
 LineEndingConversion: Posix
 
 BuildType: Website
+
+PythonType: conda
+PythonVersion: 3.9.7
+PythonPath: C:/Users/natek/anaconda3/python.exe
