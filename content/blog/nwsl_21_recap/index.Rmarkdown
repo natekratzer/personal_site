@@ -1,0 +1,130 @@
+---
+title: "Racing Louisville in their first NWSL Season"
+author: 'Nate Kratzer'
+date: '2022-03-19'
+slug: nwsl21
+categories: [Python, NWSL, Data, Sports]
+tags: [sports, nwsl, plotly, python, graphs]
+summary: "A quick look back at how Racing Louisville played in their first season, 2021, in the NWSL"
+---
+
+The NWSL Challenge Cup kicked off earlier this week, so I took quick look at some of the stats from last season. I got the data from [FBREF](https://fbref.com/en/) and made some quick graphs - I'm including the code here, but feel free to ignore it if you're only interested in the football statistics. 
+
+I wanted to know if the NWSL had teams that were focused on offense or defense, so I looked first at average goals scored and allowed per game. On average, teams score 1.15 goals per game, so I added those as reference lines. 
+
+```{python}
+import numpy as np
+import pandas as pd
+import plotly.express as px
+
+df = pd.read_csv("https://raw.githubusercontent.com/natekratzer/nwsl/main/data/team/2021_season_ovr.csv")
+df['goals_scored_per_match'] = (df['GF']/df['MP']).round(2)
+df['goals_allowed_per_match'] = (df['GA']/df['MP']).round(2)
+df['mean']= df['GF'].mean()/24 #24 games in the season
+
+fig = px.scatter(df, 
+                 x="goals_scored_per_match", 
+                 y = "goals_allowed_per_match",
+                 labels = dict(goals_scored_per_match = "Scored", goals_allowed_per_match = "Allowed"),
+                 template = 'simple_white',
+                 title = "NWSL Goals Per Match, 2021",
+                 text = 'Abbr',
+                 width = 500,
+                 height = 500
+                 )
+
+fig = fig.update_traces(textposition = 'top center')
+fig = fig.update_xaxes(range = [0.6, 1.8], nticks = 7)
+fig = fig.update_yaxes(range = [0.6, 1.8], nticks = 7,
+                 scaleanchor = "x", # make the y axis tied to X
+                 scaleratio = 1)
+
+fig = fig.add_hline(y = 1.15, opacity = 1, line_width = 2, line_dash = 'dash', line_color = 'grey')
+fig = fig.add_vline(x = 1.15, opacity = 1, line_width = 2, line_dash = 'dash', line_color = 'grey')
+
+fig = fig.add_annotation(x = 1.6, y = 0.63, text = "Data from fbref.com", showarrow = False)
+
+fig.show()
+```
+
+For the most part teams weren't really good at one end and not the other. The closest any team came to that is Houston, which is above average on offense and below average on defense. For the most part though, offensive and defensive skill go together.
+
+We'd expect average goals to matter a lot, but soccer is a pretty high variance sport, so I also wanted to know how well goal differential predicted results. Here results are the points that determine standings (3 pts for a win, 1 for a draw, 0 for a loss).
+
+```{python}
+fig = px.scatter(df, 
+                 x= "GD", 
+                 y = "Pts",
+                 trendline='ols',
+                 labels = dict(GD = "Goal Differential", Pts = "Points"),
+                 template = 'simple_white',
+                 title = "NWSL Goals and Results, 2021",
+                 text = 'Abbr'
+                 )
+
+fig = fig.update_traces(textposition = 'top center')      
+
+fig.show()
+```
+
+
+As we'd expect they track pretty neatly. Washington and Chicago had slightly better seasons than you'd expect from goal differential alone, but nothing wild. 
+
+## Racing Louisville and Homefield Advantage
+
+Racing Louisville is my team, so I also pulled some of their game specific data and here again started looking at goals. In this case I was curious about how much of a homefield advantage they have.
+
+```{python}
+df2 = pd.read_csv("https://raw.githubusercontent.com/natekratzer/nwsl/main/data/team/lou_games.csv")
+
+df2 = df2[df2['Comp'] == 'NWSL'] #exclude challenge cup which is in this dataset
+
+# Reformat to long
+goals_df = df2[['Venue', 'GF', 'GA']].melt(id_vars = ['Venue'], value_vars = ['GF', 'GA'])
+
+# recode GF and GA to Scored and Allowed
+old_list = ['GF', 'GA']
+new_list = ['Scored', 'Allowed']
+goals_df['variable'] = goals_df['variable'].replace(old_list, new_list)
+
+# Group by and summarize into new dataframe
+grouped_df = (goals_df.groupby(['Venue', 'variable'])['value']
+                      .mean()
+                      .to_frame(name='Goals')
+                      .reset_index())
+                      
+# Visualize
+fig = px.bar(grouped_df,
+             x = 'variable',
+             y = 'Goals',
+             color = 'variable',
+             facet_col = 'Venue',
+             labels = dict(variable = 'Allowed/Scored', Goals = 'Goals Per Match'),
+             template = 'simple_white',
+             title = "Racing Louisville Struggles with Defense on the Road")
+
+fig.show()
+```
+
+Here we do see a clear offense/defense distinction, which is that Louisville's defense collapses during road games. The offense is slightly worse (0.75 goals per match compared to 1.0 at home), but the defense gives up over 2 goals a game on average during away matches. 
+
+Not surprisingly, Louisville also wound up with a much worse away record (1-3-8) than home record (4-4-4)
+
+```{python}
+record_df = (df2.groupby(['Venue', 'Result'])['Date']
+                .count()
+                .to_frame(name = 'Matches')
+                .reset_index())
+
+fig = px.bar(record_df,
+             x = 'Result',
+             y = 'Matches',
+             color = 'Result',
+             facet_col = 'Venue',
+             #labels = dict(variable = 'Allowed/Scored', Goals = 'Goals Per Match'),
+             template = 'simple_white',
+             title = "Racing Louisville is Much Better at Home")
+
+fig.show()
+```
+
