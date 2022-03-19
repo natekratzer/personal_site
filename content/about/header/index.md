@@ -7,6 +7,6 @@ headline: |
 ---
 
 <!-- this is a subheadline -->
-I'm a data scientist and professor with an interest in how data science impacts people in their day to day lives. I work as a data science manager at Brown-Forman, I teach an AI and Ethics class at the University of Louisville and a Public Policy class at the University of Kentucky.   
+I'm a data scientist and professor with an interest in how data science impacts people in their day to day lives. I teach an AI and Ethics class at the University of Louisville and a Public Policy class at the University of Kentucky.   
 
 
